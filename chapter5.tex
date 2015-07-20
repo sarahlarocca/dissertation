@@ -1,0 +1,49 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Conclusion}
+\label{ch5}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Summary}
+\label{sec:ch5:summary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The overall goal of this dissertation is to address deficiencies in current methods for modeling infrastructure system reliability by developing approaches that reflect physical, engineering, and management details governing network performance, yet are also scalable to complex systems covering large geographic areas. This goal has been met through the completion of three research projects, summarized below.
+
+Chapter 2 demonstrates that there is a statistically significant relationship between the initial topological properties of scale-free networks and their corresponding robustness to both random and targeted failures. The relative simplicity of my statistical models, both in required data and in computational complexity, and their generalizability to large-scale, realistic networks make them a highly practical and efficient tool for aiding real-world decision-making. The models developed here allow for rapidly and accurately estimating network robustness, and can be used to prioritize improvement efforts among multiple existing networks and to allocate resources to those networks. These models can also be incorporated into the optimization of single networks, both for the design of new networks and for improving existing networks.
+
+Chapter 3 provides an improved understanding of the fidelity of commonly used approaches for modeling the robustness of electric power systems.  Although simplified models provide significant advantages over physical models with respect to computational time and required data, these benefits are outweighed if the simplified models cannot provide a reasonable representation of reality.  This study is the first to compare results from a wide range of simplified approaches to results from a full AC power flow study.  This work provides insights into appropriate model selection depending on the decision context.  Finally, by using a statistical model to combine multiple simplified measures to predict AC power flow behavior, this work provides a valuable tool for modeling system robustness in complex, large-scale systems for which physical flow modeling is prohibitively time-consuming.
+
+Chapter 4 proposes a new framework for modeling the reliability of interdependent infrastructure systems.  This work draws on the idea of `Muir webs,' from ecological network modeling, to represent the complex intra- and inter-system dependencies which underlie the behavior of critical infrastructure systems. The case study provided shows that the Muir web approach provides the basis for a realistic representation of the performance and reliability of interdependent infrastructure systems, and demonstrates the importance of including abiotic and management factors which can affect the performance of such systems.
+
+In summary, this dissertation represents a significant contribution to the body of methods available for modeling the reliability of infrastructure systems. It develops approaches which accurately reflect the physics-based processes in these systems, while remaining computationally feasible for large, complex systems. Understanding infrastructure robustness allows decision-makers to target optimal reinforcements in infrastructure networks and reduce the probability of failures in critical network elements, as well as to plan efficient post-failure responses, ultimately resulting in fewer costs to society.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Future research}
+\label{sec:ch5:future}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Although the work in this dissertation significantly broadens the body of current available methods for modeling infrastructure system reliability, there is, of course, still room for future work.  Two natural extensions of my dissertation work are outlined below.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Modeling cascading failures in electric power systems}
+\label{sec:ch5:future:cascades}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Because most power systems are designed with an $N-1$ or $N-2$ criterion for robustness, large blackouts are often the result of a sequence of cascading failures throughout the system \cite{Baldick2009}. Modeling cascading failures is difficult with a purely topological approach, because cascades are typically the result of overloading of system elements or unintended tripping of protective devices, both types of failures which are difficult to represent without incorporating some level of physical information. At the same time, as has been previously discussed, it is often not feasible to perform full-scale power flow modeling, particularly when simulating cascading failures where many iterations of the power flow model must be completed. Thus, in future work, I will aim to develop new approaches for simplified modeling of cascading failures, and compare the results from these and other commonly used approaches to those from an AC power flow model. This work will be accomplished by: 1) proposing new and modified topologically-based approaches for cascading failures; 2) developing a set of failure scenarios for a power transmission test system; 3) modeling cascading failures and final system state using a range of approaches (\emph{i.e.}, existing and newly proposed); and 4) comparing robustness estimates from each modeling approach to those from an AC power flow model.  This work will build and improve upon the work presented in Chapter \ref{ch3}, which did not incorporate the potential for cascading failures.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Modeling interdependent infrastructure system reliability}
+\label{sec:ch5:future:interdependence}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+One drawback of the Muir webs framework presented in Chapter \ref{ch4} is that the data needs and model complexity are significantly greater than with a traditional fragility-based approach. A potential solution to this problem is to extend the work in Chapter \ref{ch2} to interdependent networks, while incorporating the scope of influences from Chapter \ref{ch4}.  As an initial extension of this work, I hope to focus on interdependencies between power systems and communication systems, which provide a critical link between power systems and SCADA systems. Failures in a communication system can prevent the power system from receiving critical operating information from its SCADA system, leading to overload-related failures in the power system.  At the same time, a communication system is likely to experience failures as a result of loss of power.  The potential for complex feedback loops between failures in power and communication systems makes these two systems an important and interesting set of interdependent infrastructures to study.
+
+The objective of this work will be to develop statistical models for estimating performance and predicting outages in coupled infrastructure systems.  This will consist of:  1) developing a large body of random power system topologies and assigning realistic physical properties to network elements; 2) obtaining or developing test networks for cellular communication systems; 3) coupling the power systems with the cellular communications systems; 4) calculating the initial topological and physical characteristics of the systems; 5) simulating random and targeted failures of system elements; 6) assessing post-failure system performance through physical and network modeling; and 7) developing statistical models relating system performance to initial coupled system topological and physical characteristics.  This work will incorporate existing approaches from generating random power system topologies \cite{Wang2008, Ouyang2011a}, the Muir webs framework for representing interdependent infrastructure systems (Chapter \ref{ch4}), the failure propogation methodology described by Johansson and Hassel \cite{Johansson2010a}, and the failure simulation and statistical model generation procedures presented in Chapter \ref{ch2}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

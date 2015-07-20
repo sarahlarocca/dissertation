@@ -1,0 +1,557 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter[Physical performance modeling of electric power networks]{Physical performance modeling of electric power networks \footnote[5]{The work in this chapter has been accepted by \emph{Risk Analysis} as a paper entitled ``Topological Performance Measures as Surrogates for Physical Flow Models for Risk and Vulnerability Analysis for Electric Power Systems;''\cite{LaRocca2014b} the paper is currently in the second round of review.}}
+\label{ch3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:ch3:intro}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A crucial factor in conducting useful reliability and vulnerability analyses is the ability to accurately characterize the consequences of failures within the system.  Understanding a system's robustness - that is, the degree of sensitivity of system performance to failures - allows us to identify and address critical weaknesses in the system.  This understanding is generally gained through the use of a system performance model, and the fidelity of these models varies significantly. For example, for electric power infrastructure, performance models vary from purely topological-based models that do not incorporate the engineering or physical aspects of the system performance to complex AC power flow models based on the physical and engineering details of the system. If we use models which incorrectly predict system performance, our assessments are likely to give rise to sub-optimal management decisions for the infrastructure system in question.  Unfortunately, the accuracy of such models is often taken for granted when assessing the robustness (\emph{i.e.}, the opposite of vulnerability) of infrastructure systems.  In this chapter, the goal is to understand the implications of using models of varying complexity for evaluating infrastructure system performance.  To limit the scope of my work, I focus specifically on electric power systems.
+ 
+The following approach is commonly used for assessing the robustness of infrastructure systems: 1) modeling the initial performance of the infrastructure system of interest; 2) simulating various types of failures in these systems; and 3) evaluating the consequences of the failures by use of some measure of system performance \cite{Watts1998, Motter2002b, Crucitti2004a, Chassin2005, Holmgren2006a, Wang2009a}.  However, for a given infrastructure system, there are numerous mathematical and simulation models which can be used to this end; in this dissertation, such models are referred to as \emph{functional models}.  Additionally, system robustness can be quantified by a variety of \emph{performance measures}.
+
+Functional models currently in use for electric power system analysis range in complexity from pure topological approaches to physics-based models of AC power flows. Strict topological models only use information about the network structure (\emph{i.e.}, nodes and edges) to describe the behavior of the system, ignoring physical constraints such as the physics governing power flow.  This means that some important factors affecting system performance are neglected \cite{Grubesic2008}; in return, the models are computationally efficient, meaning that it is possible to analyze large systems and a large number of contingencies within feasible computational times. Additionally, topological models require significantly less data about the system than physics-based models.  Such physics-based models, often used by power engineers, incorporate capacity limits of system components as well as the physics governing power flow (\emph{i.e.}, Kirchoff's laws).  These models provide the most accurate representation of a power system, however, their computational complexity often makes their use impractical, particularly when modeling large systems and analyzing many failure scenarios.
+
+There has been little research aimed at systematically evaluating the impact of using different functional models for assessing electric power system robustness. Hines \emph{et al.} \cite{Hines2010} compare different models for evaluating electric power systems. They conclude that topological models may lead to misleading results as compared to performance estimates from a DC-linearized load flow model. However, they do not compare their results to those of a full AC power flow model and they only considered two topological performance measures. Overbye \emph{et al.} \cite{Overbye2004} compare the use of DC-linearized and AC power flow models for setting Locational Marginal Prices (LMP), concluding that the two models produce satisfactorily similar results. However, it is difficult to generalize their findings to the present context since the study was not conducted with regard to analyzing robustness. In addition, they do not look into simpler topological models, and they only address failures scenarios involving a single system component which are not likely to provide a full picture of system robustness. Baldick  \emph{et al.} \cite{Baldick2005} demonstrate empirically that DC power transfer distribution factors (PTDFs) are a good approximation to incremental PTDFs, but do not examine commonly used simplified topological approaches. Finally, Chen \emph{et al.} \cite{Chen2010} suggest a hybrid approach for modeling cascading failures that includes a DC-linearized power flow model. However, they only provide a comparison to a single topological performance measure (efficiency) and the comparison made is not as systematic as is necessary to enable a clear conclusion to be drawn.
+
+In this chapter, I present a study that aims to improve our understanding of the tradeoffs between simplicity and fidelity of functional models in the context of assessing infrastructure system robustness. More specifically, the goal of the work is to compare different functional models used to estimate the performance of electric power systems in order to evaluate how well they able to capture the behavior of the systems when exposed to perturbations.  Additionally, I develop a method which combines the strengths of existing approaches to yield a model that accurately reflects system behavior while still maintaining computational feasibility.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Classification of functional models}
+\label{sec:ch3:models}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Functional models used in existing studies of infrastructure robustness range in complexity from very simple to very advanced. In this section I propose a general classification of such approaches, consisting of four classes of increasingly advanced functional models: topological models with undifferentiated components; topological models with differentiated components; simplistic capacity models; and physical flow models. I describe each of these classes in the following subsections, focusing on approaches used to assess electric power system robustness. It should be noted, however, that a similar classification can be used for other types of technical infrastructure models, such as models of water or communication system performance.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Topological models, undifferentiated components}
+\label{sec:ch3:models:undiftopo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Many existing studies of infrastructure robustness employ topological functional models based on network theory.  Such models are a particularly valuable tool for assessing infrastructure robustness, because most infrastructure systems naturally take the form of a network.  Topological models disregard physical flows in the system, instead representing the system abstractly as a collection of nodes and edges.  In the simplest category of topological models, there is no differentiation between components in the system; that is, different functions within the set of nodes or edges are ignored \cite{Holme2002, Motter2002b, Latora2005, Holmgren2006a, Rosas-Casals2007, Winkler2010}.  When modeling power systems, this means that no distinction is made between buses, substations, or generators - all are treated simply as nodes (overhead power lines and underground cables are treated simply as edges).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Topological models, differentiated components}
+\label{sec:ch3:models:diftopoo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Neglecting to differentiate between types of system components may provide an inaccurate representation of reality, particularly if the components are actually highly heterogeneous (\emph{e.g.}, have significantly different functions). Therefore, a second, more complex, category of topological models is often used, incorporating details about the various functions of the system components.  For power systems, a commonly used approach is to model the system as a network consisting of three types of nodes: generators, substations, and load points; another approach is to simply differentiate between in-feed and load nodes \cite{Albert2004, Holmgren2006a, Duenas-Osorio2009, Winkler2010}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simplistic capacity models}
+\label{sec:ch3:models:capacity}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Simplistic capacity models combine network flow methods with actual system data to represent loads and capacities in the system.  Because such methods do not attempt to incorporate \emph{physical} flow modeling (\emph{e.g.}, hydraulic modeling or power flow analysis), but instead rely on a network-based approach, these models can still be seen as predominantly topological. Several simplistic capacity models have been used for analyzing power system robustness. Wang \emph{et al.} \cite{Wang2011} develop a functional model which incorporates information about maximum load and generator capacity in the system along with line impedances with a traditional topological approach, resulting in a concept they call `electrical betweenness.'  Another approach, presented in J\"{o}nsson \emph{et al.} \cite{Jonsson2008} uses capacity values for all in-feed nodes (\emph{i.e.}, generators), as well as demand at load nodes (\emph{i.e.}, distribution substations) to calculate the amount of power not supplied to substations.  This functional model relies on a network search algorithm to `push' capacity of an in-feed node through the network to load nodes, rather than conducting a complete load flow analysis in accordance with Kirchoff's laws.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Physical flow models}
+\label{sec:ch3:models:physflow}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The topological approaches described above do not fully capture the details regarding the physical flow in the systems under study. However, the fundamental physical laws governing the flows in different types of infrastructure are typically well-known, and are therefore easy to include in a functional model, at least conceptually.  Modeling such physical flows does come at a cost, though; both computational times and initial data requirements are likely to increase when using such a functional model. For electric power systems, physical flows are typically addressed by the use of a DC-linearized or AC load flow model to evaluate the steady-state conditions of the system. Several previous studies have, to varying extent, incorporated DC or AC load flow analysis in assessing infrastructure robustness and reliability \cite{Dobson2001, Carreras2002a, Dobson2002, Dobson2003, Song2005, Pepyne2007, Arianos2009, Chen2010}.
+
+In addition to the previously presented functional models, dynamic models are also used to solve the flow of the network also in the time-/frequency-domain. Dynamic models are used for analysis of phenomenon such as transient stability, harmonics, and the design of protection schemes for power systems. In general these types of simulations are very computationally burdensome and it is typically infeasible to use them in conducting vulnerability analyses of electric power systems; therefore dynamic models are not included in the comparison of functional models in this chapter.
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Performance measures}
+\label{ssec:models:performance}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+For any given functional model, there may be multiple measures that can be used to quantify system performance.  For example, when using a topological model with undifferentiated components (\emph{i.e.}, representing the system as a network with no additional information except the relationships between nodes and edges), a variety of network theoretic measures can be selected to describe system performance, including size of the largest connected subgraph, average path length,  and network diameter.  Or, when using a physical flow model, such as DC load flow for an electric power system, performance could be quantified as unsupplied load or the number of customers without power.  When comparing functional models, it is important to also consider the corresponding performance measure being used.  Thus, in this work, I evaluate functional model-performance measure \emph{pairs}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:ch3:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Test system}
+\label{sec:ch3:methods:testsys}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In this work, I use the one-area IEEE Reliability Test System-1996 (RTS96), a bulk power transmission system (230 and 138 kV) including generation, transmission, and loads (see Figure \ref{fig:ch3:rts96}) \cite{Grigg1999}. As a test system designed specifically for reliability studies, the description of RTS96 includes detailed data on generation reliability and capacity, transmission system reliability and capacity, and load curves with respect to both yearly and daily variation \cite{Grigg1999}. The system consists of 24 buses (nodes) and 38 branches (edges). The annualized peak power demand is 2850 MW in total. Annual and daily fluctuations of loads are not taken into account here. Aggregated generation capacity is 3405 MW. The 24-hour emergency power rating of lines is used for line capacity.
+
+%--------------------------------------------
+% FIGURE ------------------------------------
+
+\begin{figure}[!htp]
+\centerline{\includegraphics{rts96.pdf}}
+\caption[IEEE One-Area RTS-96]{\label{fig:ch3:rts96}IEEE One-Area RTS-96 \cite{Grigg1999}.}
+\end{figure}
+
+%--------------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Functional models and performance measures}
+\label{sec:ch3:methods:models}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As discussed above, there are a number of functional models and performance measures which can be used to analyze the robustness of infrastructure systems.  In this work, I test 9 different functional model-performance measure pairs using the IEEE RTS-96 system described above, as summarized in Table~\ref{tab:ch3:funcmodel}.  Although many of these functional models and performance measures are flexible enough to incorporate the potential for cascading failures, here I focus only on `static' versions of these models. The following sections describe in detail the functional models and corresponding performance measures used in my analysis.
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{table}
+\centering
+\scriptsize
+
+\begin{tabular}{l l l}
+\toprule
+\textbf{Functional model} & \textbf{Performance measure} & \textbf{Label}\\
+\midrule
+\multirow{3}{*}{Topological, undifferentiated components} & Largest connected component & LCSG\\
+ & Diameter & D \\
+ & Efficiency & E \\
+\hline
+\multirow{5}{*}{Topological, differentiated components} & Efficiency, pairs of in-feed and load nodes & EN\\
+ & Efficiency, pairs of in-feed and load nodes, & \multirow{2}{*}{ENE} \\
+ & weighted by impedance &  \\
+ & Connectivity loss & CL \\
+ & Power connection loss & PCL \\
+\hline
+Simplistic capacity & Power not supplied & PNS \\
+\hline
+\multirow{2}{*}{Physical flow } & Power not supplied, based on DC power flow & DC \\
+ & Power not supplied, based on AC power flow & AC \\
+\bottomrule
+\end{tabular}
+
+\caption{\label{tab:ch3:funcmodel}Functional models and performance measures used in analysis.}
+
+\end{table}
+
+%--------------------------------------------
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Topological models, undifferentiated components}
+\label{ssec:methods:models:undiftopo}
+%--------------------------------------------
+
+In existing studies of electric power system robustness using a topological model with undifferentiated components, a variety of network theory-based performance measures have been suggested \cite{Albert2004, Holmgren2006a, Rosas-Casals2007, Sole2008, Arianos2009, Winkler2010, Hines2011}.  Here, I evaluate three of these performance measures: largest connected subgraph; network diameter; and network efficiency.  These performance measures, as used in conjunction with a topological function model with undifferentiated components, are described below.
+
+\paragraph{\normalfont\textbf{Largest connected subgraph (LCSG)}}
+The largest connected subgraph in a graph is defined as the largest subgraph in which a path exists between all pairs of nodes.  Then, the size of the largest connected subgraph is defined as:
+\begin{equation}
+ S_{LCSG} = N_{LCSG},
+\end{equation}
+where $N_{LCSG}$ is the number of nodes in the largest subgraph.
+
+\paragraph{\normalfont\textbf{Diameter (D)}}
+The diameter of a network is defined as the `longest shortest path' in the network, that is:
+\begin{equation}
+ D = \textrm{max}_{i,j} d_{ij},
+\end{equation}
+where $d_{ij}$ is the length of the shortest path (\emph{i.e.}, number of edges) between node $i$ and node $j$.  Here, diameter is calculated for the largest connected subgraph.
+ 
+\paragraph{\normalfont\textbf{Efficiency (E)}}
+Network efficiency, also known as average inverse path length, is defined as follows:
+\begin{equation}
+ E = \frac{1}{N(N-1)}\sum_{i,j}\frac{1}{d_{ij}},
+\end{equation}
+where $N$ is the number of nodes in the network and $d_{ij}$ is the length of the shortest path between node $i$ and node $j$.
+ 
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Topological models, differentiated components}
+\label{ssec:methods:models:diftopo}
+%--------------------------------------------
+
+As previously mentioned, not differentiating between different types of system components may result in a misrepresentation of true system behavior. In order to overcome this limitation, several topologically-based performance measures have been used in existing studies to account for the fact that all nodes and edges do not have the same function \cite{Albert2004, Johansson2007a}. Additionally, I propose two new topological measures that I hypothesize might more accurately capture the performance of electric power systems.  These performance measures, both existing and newly proposed, are described below.
+
+\paragraph{\normalfont\textbf{Efficiency, pairs of in-feed and load nodes (EN)}}
+As described above, network efficiency is calculated based on the shortest paths between all pairs of nodes in the network. However, in an electric power system it may not be particularly relevant whether pairs of load nodes are well connected unless they are also well-connected to those nodes that inject the electric flow into the system (\emph{e.g.},generators and transformers). Thus, our first newly proposed measure of network efficiency is calculated as with the traditional measure of network efficiency, $E$, described above, with the exception that only paths between in-feed and load nodes are considered.  That is,  
+\begin{equation}
+ EN = \frac{1}{N(N-1)}\sum_{i \in N_{F},j \in N_{L}}\frac{1}{d_{ij}},
+\end{equation}
+ where $N$ is the total number of nodes in the network, $N_F$ is the set of in-feed nodes, $N_L$ is the set of load nodes, and $d_{ij}$ is the length of the shortest path between node $i$ and node $j$.
+ 
+\paragraph{\normalfont\textbf{Efficiency, pairs of in-feed and load nodes, weighted by impedance (ENE)}}
+Here, I suggest a second new measure incorporating `electrical distance,' that is, line impedance, into the shortest path calculations. This second measure of network efficiency is calculated as like $EN$, with the addition that path length is weighted by electrical line impedance.  So, we have:
+\begin{equation}
+ ENE = \frac{1}{N(N-1)}\sum_{i \in N_{F},j \in N_{L}}\frac{1}{d_{ij}|Z_{ij}|},
+\end{equation}
+where $N$ is the total number of nodes in the network, $N_F$ is the set of in-feed nodes, $N_L$ is the set of load nodes, $d_{ij}$ is the length of the shortest path between node $i$ and node $j$, and $|Z_{ij}|$ is the magnitude of the impedance of path $ij$.
+ 
+\paragraph{\normalfont\textbf{Connectivity loss (CL)}}
+Connectivity loss is a topologically-based performance measure for electric power systems that was first proposed in Albert \emph{et al.} \cite{Albert2004}.  It describes the `ability of distribution substations to receive power from the generators,' and is defined as follows:
+\begin{equation}
+ CL = 1 - \frac{1}{N_D}\sum_{i}^{N_D}\frac{N_{G}^i}{N_G},
+\end{equation}
+where $N_G$ is the total number of generators, $N_D$ is the total number of distribution substations, and $N_G^i$ is the number of generators connected to substation $i$.
+ 
+\paragraph{\normalfont\textbf{Power connection loss (PCL)}}
+Power connection loss was first described by Johansson \emph{et al.} \cite{Johansson2007a} as the aggregate load at nodes that do not have any connection to an in-feed node, such as a generator or transformer. It is thus defined as:
+\begin{equation}
+ PCL = \sum_{i \in NC} \textrm{load}_i, 
+\end{equation}
+where $NC$ is the set of nodes that do not have any connection to an in-feed node and load$_i$ is the load at node $i$.
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Simplistic capacity models}
+\label{ssec:methods:models:capacity}
+%--------------------------------------------
+
+I evaluate a simplistic capacity model for electric power systems that was first presented in J\"{o}nsson \emph{et al.} \cite{Jonsson2008}. This network flows-based algorithm, which is used to calculate total amount of real power not supplied to substations without incorporating Kirchoff's laws, is described below.
+
+\paragraph{\normalfont\textbf{Power not supplied (PNS)}}
+This method requires capacity values for all in-feed nodes (\emph{i.e.}, generators), as well as demand at load nodes (\emph{i.e.}, distribution substations). Power not supplied is calculated as follows: 1) select initial in-feed node; 2) “push” capacity of in-feed node through network using a breadth-first search; 3) subtract substation loads from initial capacity of in-feed node when a substation is reached and flag substation as supplied; 4) continue distributing capacity of initial in-feed node until it has been consumed; 5) select another in-feed node; 6) return to step 1, repeating until all connected substations are supplied or all available in-feed capacity is consumed; 7) power not supplied is equal to the total substation load that is not supplied.  Thus, we have:
+\begin{equation}
+ PNS = \sum_i^n \textrm{load}_{demanded_i} - \textrm{load}_{supplied_i},
+\end{equation}
+where $n$ is the number of nodes in the network, $\textrm{load}_{demanded_i}$ is the demand at node $i$ and $\textrm{load}_{supplied_i}$ is the load supplied to node $i$.
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Physical flow models}
+\label{ssec:methods:models:physflow}
+%--------------------------------------------
+
+For electric power systems, physical flow-based functional models involve load flow analysis to evaluate the steady-state conditions of the system, either using a DC-linearized approximation or a full AC power flow model. The most accurate way to represent the physical flow of power in an electric power system is to use an AC load flow model. However, AC power flow is described by nonlinear equations for which convergent solutions are often difficult to obtain; solving AC power flow requires significant computational resources and time which are often prohibitive, particularly in large-scale simulations. As a result, a DC-linearized approximation, which only considers the flow of real power, ignoring reactive power, is often used to approximate AC power flow. The relative simplicity of the DC equations combined with their linearity allows a direct (\emph{i.e.}, non-iterative) solution to be obtained quickly.  
+
+\paragraph{\normalfont\textbf{Power not supplied, based on DC load flow analysis (DC)}, and \textbf{power not supplied, based on AC load flow analysis (AC)
+}}
+
+MATPOWER \cite{Zimmerman2011}, a Matlab package developed through the Power Systems Engineering Research Center (PSERC), was used to perform both DC and AC load flow modeling \cite{Zimmerman2011}. MATPOWER allows for calculation of DC linearized power flow, AC power flow, DC linearized optimal power flow (DC OPF), and AC optimal power flow (AC OPF). Optimal power flow is determined through an objective function which minimizes generation and unsupplied load costs and includes constraints such as branch capacity and voltage limits. Here the optimal power flow algorithm is used for both the AC and DC models, curtailing load until a solution can be attained. If a solution cannot be found which satisfies the constraints, all load in the system or subsystem (if the initial system has split into several subsystems) is curtailed \cite{IEEE1995, Billinton1996, Arnborg1997, Arini1999, Ladhani2004}. System performance is measured as the total amount of load (active power only) curtailed as a result of failures in the system.
+\\
+\indent
+The generation, loading, and branch-limits used were provided with the test system. The settings for busbar voltage limits were 1.1 p.u. for the upper limit and 0.7 p.u. for the lower limit.  This relatively low value for the lower voltage limit was selected because in this work load flow is being calculated for a severely strained system. However, a system operating at below 0.7 p.u. is likely to experience a voltage collapse, in accordance with Taylor \cite{Taylor1994}. The loads in the system were designated as negative generators and associated with a large negative cost (piecewise linear cost function with the settings $x_0=0$, $y_0=0$, $x_1=-P_{load}$, and $y_1=-10000P_{load}$). The generation cost was set with low positive values (polynomial cost function with nominal values for $c_2=1$, $c_1=1$, and $c_0=0$).\footnote[6]{In the rare occasion of convergence problems with the optimization algorithm, different $c_2$ values were selected in attempts to find a converging solution, where $c_2 \in \{0.001, 0.01, 0.1, 2, 4, 5, 18, 32, 64\}$.}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Failure scenarios}
+\label{ssec:methods:failures}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Since the goal of this work is to evaluate the effectiveness of various functional models in the context of assessing infrastructure system vulnerability, I develop a set of failure scenarios, or strains, which my network experiences. Most topological studies of power system vulnerability focus on node removals, so I assess node failures here. However, in real power systems, overload-related failures are more likely to occur in lines than in buses, and thus it is important to also address edge failures. I simulate each type of failure independently; that is, in one set of scenarios I consider node failures and in another I consider edge failures.
+
+In order to limit the scope of my work, I only evaluate scenarios in which system components fail randomly.  To generate a given random failure scenario, I use a uniform random number generator to sequentially select nodes or edges for removal from operation, resulting in a strain vector, or failure scenario vector, containing a random ordering of all nodes or edges in the the system. I repeat this process 1,000 times for both nodes and edges, resulting in two strain matrices (one for nodes and one for edges) consisting of 1,000 vectors of randomly ordered component failures. I then use the strain matrices for each of the functional models from Section~\ref{sec:ch3:methods:models}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Statistical analysis}
+\label{sec:ch3:methods:stats}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Ideally, the reference for comparing the results from using different functional models and performance measures should be empirical results from the system of interest. However, since I am conducting my analysis on a fictitious test system, such data do not exist.\footnote[7]{Even when analyzing a real system, it is highly unlikely that one would be able to obtain empirical data for more than a few failure scenarios.}  Therefore, I assume that the most advanced functional model (\emph{i.e.}, the full AC load flow model) corresponds most closely with the true performance of the system. For the AC load flow functional model, my performance measure is the load curtailed (real power) in the system as a fraction of the initial load in the system, that is, the percent change in load that the system is able to meet after a given failure scenario. Because different performance measures are used for other functional models (\emph{e.g.}, network diameter for a pure topological approach) and do not directly correspond to load curtailed, I standardize all other performance measures to the range [0,1] in order to carry out the comparisons.
+
+For each of the nine functional model-performance measure pairs described above, I fit simple linear regression models with load curtailed as based on AC load flow analysis as the response variable in order to try to approximate the AC load flow results based on the results from the simpler models. Table~\ref{tab:ch3:simplinreg} summarizes the models for each functional model-performance measure. I also fit multiple linear regression models using six different combinations of functional model-performance measure pairs as covariates. The combinations of functional model-performance measure pairs were selected to encompass varying levels of complexity in input data, \emph{e.g.}, combinations of topological models or combinations of topological models \emph{and} simplistic capacity models. After fitting each of these initial models, I iteratively remove all covariates from the model that are not statistically significant. That is, for a given model, I remove the explanatory variable with the highest p-value, refit the model, and repeat until all variables are statistically significant at the level of $\alpha = 0.05$.  Table~\ref{tab:ch3:multlinreg} presents each combination of covariates used to develop the multiple linear regression models.  As with the simple linear regression models (Table~\ref{tab:ch3:simplinreg}), I use six different sets of data to fit six independent multiple linear regression models for each of the covariate combinations in Table ~\ref{tab:ch3:multlinreg}.  For each type of simple or multiple regression model, I fit a model based on the results of scenarios with 1, 3, 5, 7, and 9 nodes removed and scenarios with 5, 7, 9, 11, and 13 edges removed.\footnote[8]{Different numbers of node and edge failures were considered because in general, edge failures tend to have a smaller impact on network performance than node failures, and it was not possible to develop statistically significant models for small numbers of edge failures.}
+ 
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{table}
+\centering
+
+\begin{tabular}{ccc}
+\toprule
+{\textbf{Model}} & {\textbf{Element removed}} & {\textbf{Number removed}}\\
+\midrule
+a & Nodes & 1 \\
+b & Nodes & 3 \\
+c & Nodes & 5 \\
+d & Nodes & 7 \\
+e & Nodes & 9 \\
+f & Edges & 5 \\
+g & Edges & 7 \\
+h & Edges & 9 \\
+i & Edges & 11 \\
+j & Edges & 13 \\
+\bottomrule
+\end{tabular}
+
+\caption[Summary of simple linear regression models for functional model-performance measure pairs.]{\label{tab:ch3:simplinreg}Summary of simple linear regression models developed for each functional model-performance measure pair.}
+
+\end{table}
+
+%--------------------------------------------
+
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{table}
+\centering
+
+\begin{tabular}{c l}
+\toprule
+{\textbf{Combination}} & {\textbf{Covariates}}\\
+\midrule
+1 & LCSG; D; E \\
+2 & LCSG; D; EN \\
+3 & LCSG; D; EN; CL \\
+4 & CL; PCL; PNS \\
+5 & LCSG; D; EN; CL; PCL; PNS \\
+6 & LCSG; D; EN; CL; PCL; PNS; DC \\
+\bottomrule
+\end{tabular}
+
+\caption[Summary of functional model-performance measure combinations used in multiple linear regression models.]{\label{tab:ch3:multlinreg}Summary of functional model-performance measure combinations used in multiple linear regression models.}
+
+\end{table}
+
+%--------------------------------------------
+
+I then test the predictive accuracy of each of the 150 resulting regression models using repeated random holdout validation.  For each model, I randomly split my initial data into two sets: training data (90\% of initial data) and validation data (10\% of initial data). I use the training data to fit a regression model using the initial combination of parameters from Tables~\ref{tab:ch3:simplinreg} and \ref{tab:ch3:multlinreg}. I then use this new regression model to predict load curtailed for each record in the validation data set.  I compare these predicted values to the actual values from the AC load flow analysis. For each of the 150 full regression models, I repeat this process 100 times (beginning with the random split of our initial data) for a 100-fold random holdout cross-validation.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:ch3:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+For each node failure scenario and edge failure scenario, I use the functional model-performance measures to assess the behavior of the system after each level of component removal (\emph{i.e.}, 1 component removed, 2 components removed, through $n$ components removed, where $n$ is the number of nodes or edges in the system).  Figures~\ref{fig:ch3:pfScatterNodes} and~\ref{fig:ch3:pfScatterEdges} present comparisons of each functional model-performance measure with the results of the AC load flow analysis for all failure scenarios and numbers of components removed; Table \ref{tab:ch3:rss} presents the residual sum of squares for each functional model-performance measure as compared with AC. Based on these results, it is clear that although a functional model-performance measure may give a reasonable estimate of the mean network robustness, the correctness of the estimate for the individual scenarios may vary greatly. This is significant, because in reality systems are not typically subjected repeatedly to varying failure scenarios. Instead, when assessing system robustness, it may be important to understand how the system will perform when subjected to a specific failure scenario, and unfortunately this information is not provided by all functional model-performance measures. Thus, the selection of a functional model-performance measure is dependent on the decision context, as discussed below in Section \ref{sec:ch3:discussion}.
+
+%--------------------------------------------
+% FIGURE ------------------------------------
+
+\begin{figure}[!ph]
+
+\centerline{\includegraphics[trim=0 0 150 300,clip,width=\textwidth]{pfScatterNodesV2.pdf}}
+\caption[Correlation plots for node removals.]{\label{fig:ch3:pfScatterNodes}Correlation plots for node removals. Each dot represents the system performance for a given failure scenario as calculated by a given functional model-performance measure (y-axis) and the AC load flow analysis (x-axis).}
+\end{figure}
+
+%--------------------------------------------
+
+%--------------------------------------------
+% FIGURE ------------------------------------
+
+\begin{figure}[!htp]
+\centerline{\includegraphics[trim=0 0 150 300,clip,width=\textwidth]{pfScatterEdgesV2.pdf}}
+\caption[Correlation plots for edge removals.]{\label{fig:ch3:pfScatterEdges}Correlation plots for edge removals. Each dot represents the system performance for a given failure scenario as calculated by a given functional model-performance measure (y-axis) and the AC load flow analysis (x-axis).}
+\end{figure}
+
+%--------------------------------------------
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{table}
+\centering
+
+\begin{tabular}{ccc}
+\toprule
+\multirow{2}{*}{\textbf{Performance measure}} & \multicolumn{2}{c}{\textbf{Residual sum of squares}}\\
+ & {Nodes} & {Edges}\\
+
+\midrule
+
+LCSG & 290 & 2930 \\
+D & 2040 & 3750 \\
+E & 864 & 6170 \\
+EN & 916 & 6940 \\
+ENE & 890 & 6850 \\
+CL & 1000 & 5380 \\
+PCL & 147 & 402 \\
+PNS & 9.73 & 54.2 \\
+DC & 2.68 & 9.96 \\
+
+\bottomrule
+\end{tabular}
+
+\caption[Residual sum of squares for functional model-performance measure predictions.]{\label{tab:ch3:rss}Residual sum of squares (RSS) for functional model-performance measure predictions as compared to AC predictions.}
+
+\end{table}
+
+%--------------------------------------------
+
+
+Figures~\ref{fig:ch3:pfScatterNodes} and~\ref{fig:ch3:pfScatterEdges} show that the accuracy of the performance measures largely follows the classification in Section~\ref{sec:ch3:models}; that is, in general, the greater the inclusion of functional characteristics, the better the estimate of the system's actual performance for a given failure scenario. The topological performance measures LCSG and D both significantly overestimate and underestimate the consequences for individual failure scenarios, though the diameter measure more often underestimates consequences. One reason that the largest connected subgraph measure may overestimate consequences is that it is possible for the system to split into two subgraphs, or islands, but still be able to supply all the load from the generators in each island. In such a situation, the LCSG performance measure would estimate significantly decreased performance, when in fact the system was still functioning at its initial performance. 
+
+The performance measures E, EN, ENE, and CL typically overestimate consequences as compared to the AC model. The more physically oriented models, PCL, PNS and DC nearly always underestimate the consequences for individual scenarios as compared to the AC model. The reason for this is because they do not account for voltage and branch constraints (except for the DC optimal power flow model, which does consider active power flow branch constraints). The proposed performance measures EN and ENE do not capture the behavior of the system better than the classic network theoretic measure of efficiency, E, which does not take any physical aspects into account. The best performing functional model-performance measures are clearly PCL, PNS and DC, but LCSG appears to also give a reasonable estimate of system performance for node removals, but less so for edge removals.
+
+The repeated random holdout validation tests conducted for each of our 150 regression models (75 models for node failures and 75 models for edge failures) further support the trends described above.  That is, when more physical information about the system that is included in a single or group of functional model-performance measure(s), these functional model-performance measure(s) are, in general, better able to predict AC-load curtailed. Figures~\ref{fig:ch3:pfHoldoutNodes} and \ref{fig:ch3:pfHoldoutEdges} and Tables \ref{tab:ch3:errorNodes} and \ref{tab:ch3:errorEdges} present the root mean squared errors averaged over 100 holdout samples for each of the regression models.
+
+
+%--------------------------------------------
+% FIGURE ------------------------------------
+
+\begin{landscape}
+
+\vspace*{\fill}
+\centering\vspace*{\fill}
+
+\begin{figure}[!htp]
+\centerline{\includegraphics[width=600pt]{pfHoldoutNodesV4.pdf}}
+\caption[Root mean squared errors for predictions of system performance after node failures.]{\label{fig:ch3:pfHoldoutNodes}Root mean squared errors for predictions of system performance after node failures based on 100 holdout samples using simple and multiple regression models.}
+\end{figure}
+
+\vspace*{\fill}
+
+\end{landscape}
+
+%--------------------------------------------
+% FIGURE ------------------------------------
+
+\begin{landscape}
+
+\vspace*{\fill}
+\centering
+
+\begin{figure}[!htp]
+\centerline{\includegraphics[width=600pt]{pfHoldoutEdgesV4.pdf}}
+\caption[Root mean squared errors for predictions of system performance after edge failures.]{\label{fig:ch3:pfHoldoutEdges}Root mean squared errors for predictions of system performance after edge failures based on 100 holdout samples using simple and multiple regression models.}
+\end{figure}
+
+\vspace*{\fill}
+
+\end{landscape}
+
+
+%--------------------------------------------
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{landscape}
+
+\vspace*{\fill}
+\begin{table}[!hp]
+\centering
+\tiny
+\renewcommand\tabcolsep{3pt}
+
+\begin{tabular}{lcccccc}
+\toprule
+
+\multirow{2}{*}{\textbf{Covariates}} & \multirow{2}{*}{\textbf{Regression type}} & \multicolumn{5}{c}{\textbf{Root mean squared error}} \\
+ & & 1 node removed & 3 nodes removed & 5 nodes removed & 7 nodes removed & 9 nodes removed \\
+\midrule
+
+\textbf{LCSG/D/E} & Multiple & 0.034 (0.030, 0.038) & 0.064 (0.055, 0.073) & 0.087 (0.074, 0.10) & 0.10 (0.085, 0.12) & 0.11 (0.092, 0.13) \\ 
+\textbf{LCSG/D/EN} & Multiple & 0.028 (0.025, 0.032) & 0.052 (0.045, 0.059) & 0.071 (0.061, 0.080) & 0.083 (0.074, 0.093) & 0.09 (0.077, 0.11) \\ 
+\textbf{LCSG/D/EN/CL} & Multiple & 0.028 (0.025, 0.031) & 0.052 (0.044, 0.058) & 0.069 (0.060, 0.078) & 0.080 (0.071, 0.092) & 0.087 (0.076, 0.1) \\ 
+\textbf{LCSG/D/EN/CL/PCL/PNS} & Multiple & $3.7\times10^{-11}$ ($3.2\times10^{-11}$, $4.1\times10^{-11}$) & 0.016 (0.011, 0.023) & 0.024 (0.017, 0.032) & 0.028 (0.022, 0.035) & 0.029 (0.018, 0.058) \\ 
+\textbf{CL/PCL/PNS} & Multiple & $3.8\times10^{-11}$ ($3.3\times10^{-11}$, $4.1\times10^{-11}$) & 0.017 (0.01, 0.025) & 0.024 (0.017, 0.034) & 0.029 (0.022, 0.037) & 0.031 (0.018, 0.059) \\ 
+\textbf{LCSG/D/EN/CL/PCL/PNS/DC} & Multiple & -- & 0.0068 (0.0050, 0.0089) & 0.0088 (0.0071, 0.010) & 0.0094 (0.0076, 0.012) & 0.015 (0.0074, 0.046) \\ 
+\textbf{LCSG} & Simple & 0.034 (0.030, 0.038) & 0.064 (0.054, 0.073) & 0.087 (0.074, 0.10) & 0.10 (0.087, 0.12) & 0.11 (0.093, 0.13) \\ 
+\textbf{D} & Simple & 0.034 (0.030, 0.038) & 0.065 (0.056, 0.076) & 0.089 (0.077, 0.10) & 0.10 (0.087, 0.12) & 0.11 (0.094, 0.13) \\ 
+\textbf{E} & Simple & 0.034 (0.030, 0.038) & 0.064 (0.055, 0.075) & 0.087 (0.074, 0.10) & 0.10 (0.087, 0.12) & 0.11 (0.093, 0.13) \\ 
+\textbf{EN} & Simple & 0.029 (0.026, 0.033) & 0.053 (0.045, 0.061) & 0.072 (0.062, 0.083) & 0.086 (0.075, 0.098) & 0.094 (0.078, 0.11) \\ 
+\textbf{ENE} & Simple & 0.032 (0.028, 0.035) & 0.057 (0.050, 0.065) & 0.077 (0.066, 0.086) & 0.090 (0.079, 0.10) & 0.097 (0.084, 0.12) \\ 
+\textbf{CL} & Simple & 0.029 (0.026, 0.032) & 0.054 (0.046, 0.062) & 0.075 (0.064, 0.086) & 0.089 (0.075, 0.10) & 0.096 (0.079, 0.12) \\ 
+\textbf{PCL} & Simple & 0.0098 (0.0061, 0.014) & 0.041 (0.029, 0.053) & 0.065 (0.052, 0.077) & 0.082 (0.070, 0.094) & 0.089 (0.076, 0.11) \\ 
+\textbf{PNS} & Simple & 0.0028 (0.0016, 0.0041) & 0.017 (0.011, 0.025) & 0.024 (0.017, 0.034) & 0.028 (0.022, 0.037) & 0.031 (0.018, 0.059) \\ 
+\textbf{DC} & Simple & 0.0028 (0.0016, 0.0041) & 0.008 (0.0066, 0.0095) & 0.0098 (0.0080, 0.012) & 0.010 (0.0081, 0.012) & 0.016 (0.0077, 0.047) \\ 
+\textbf{Mean-only model} & -- & 0.034 (0.030, 0.038) & 0.065 (0.055, 0.076) & 0.090 (0.077, 0.10) & 0.11 (0.092, 0.12) & 0.12 (0.098, 0.13) \\ 
+
+\bottomrule
+
+\end{tabular}
+
+\caption[Root mean squared errors for predictions of system performance after node failures.]{\label{tab:ch3:errorNodes}Root mean squared errors for predictions of system performance after node failures based on 100 holdout samples using simple and multiple regression models. Values in parentheses give 95\% confidence intervals.}
+
+\end{table}
+\vspace*{\fill}
+\end{landscape}
+%--------------------------------------------
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{landscape}
+
+\vspace*{\fill}
+\begin{table}[!hp]
+\centering
+\tiny
+\renewcommand\tabcolsep{3pt}
+
+\begin{tabular}{lcccccc}
+\toprule
+
+\multirow{2}{*}{\textbf{Covariates}} & \multirow{2}{*}{\textbf{Regression type}} & \multicolumn{5}{c}{\textbf{Root mean squared error}} \\
+ & & 1 node removed & 3 nodes removed & 5 nodes removed & 7 nodes removed & 9 nodes removed \\
+\midrule
+
+\textbf{LCSG/D/E} & Multiple & 0.015 (0.011, 0.020) & 0.026 (0.019, 0.034) & 0.038 (0.032, 0.046) & 0.049 (0.042, 0.058) & 0.059 (0.051, 0.072) \\ 
+\textbf{LCSG/D/EN} & Multiple & 0.015 (0.011, 0.020) & 0.026 (0.019, 0.034) & 0.039 (0.032, 0.047) & 0.049 (0.043, 0.059) & 0.060 (0.051, 0.072) \\ 
+\textbf{LCSG/D/EN/CL} & Multiple & 0.015 (0.010, 0.024) & 0.026 (0.019, 0.034) & 0.039 (0.032, 0.047) & 0.049 (0.043, 0.059) & 0.060 (0.051, 0.072) \\ 
+\textbf{LCSG/D/EN/CL/PCL/PNS} & Multiple & 0.010 (0.0063, 0.016) & 0.020 (0.013, 0.027) & 0.032 (0.024, 0.041) & 0.040 (0.032, 0.047) & 0.043 (0.037, 0.050) \\ 
+\textbf{CL/PCL/PNS} & Multiple & 0.011 (0.0063, 0.016) & 0.021 (0.013, 0.028) & 0.032 (0.025, 0.043) & 0.040 (0.033, 0.049) & 0.044 (0.037, 0.051) \\ 
+\textbf{LCSG/D/EN/CL/PCL/PNS/DC} & Multiple & 0.0071 (0.0042, 0.011) & 0.010 (0.0077, 0.013) & 0.012 (0.0095, 0.015) & 0.012 (0.010, 0.015) & 0.013 (0.0097, 0.019) \\ 
+\textbf{LCSG} & Simple & 0.015 (0.011, 0.020) & 0.026 (0.020, 0.035) & 0.039 (0.032, 0.047) & 0.049 (0.042, 0.059) & 0.060 (0.052, 0.073) \\ 
+\textbf{D} & Simple & 0.016 (0.011, 0.022) & 0.028 (0.022, 0.039) & 0.042 (0.034, 0.052) & 0.054 (0.046, 0.064) & 0.065 (0.057, 0.080) \\ 
+\textbf{E} & Simple & 0.016 (0.012, 0.021) & 0.027 (0.021, 0.037) & 0.040 (0.033, 0.049) & 0.052 (0.044, 0.061) & 0.062 (0.054, 0.076) \\ 
+\textbf{EN} & Simple & 0.016 (0.012, 0.022) & 0.028 (0.022, 0.038) & 0.041 (0.033, 0.050) & 0.053 (0.045, 0.062) & 0.063 (0.054, 0.077) \\ 
+\textbf{ENE} & Simple & 0.016 (0.011, 0.022) & 0.028 (0.022, 0.039) & 0.042 (0.034, 0.051) & 0.054 (0.047, 0.064) & 0.065 (0.057, 0.081) \\ 
+\textbf{CL} & Simple & 0.015 (0.012, 0.021) & 0.027 (0.020, 0.036) & 0.039 (0.032, 0.049) & 0.050 (0.043, 0.059) & 0.061 (0.053, 0.075) \\ 
+\textbf{PCL} & Simple & 0.012 (0.0076, 0.019) & 0.024 (0.016, 0.035) & 0.037 (0.028, 0.048) & 0.050 (0.043, 0.060) & 0.062 (0.055, 0.077) \\ 
+\textbf{PNS} & Simple & 0.011 (0.0064, 0.016) & 0.021 (0.013, 0.028) & 0.032 (0.025, 0.043) & 0.040 (0.034, 0.049) & 0.044 (0.038, 0.051) \\ 
+\textbf{DC} & Simple & 0.0075 (0.0047, 0.011) & 0.011 (0.0083, 0.014) & 0.013 (0.010, 0.016) & 0.013 (0.011, 0.016) & 0.014 (0.010, 0.019) \\ 
+\textbf{Mean-only model} & -- & 0.016 (0.011, 0.022) & 0.028 (0.022, 0.039) & 0.041 (0.034, 0.051) & 0.054 (0.047, 0.064) & 0.065 (0.057, 0.081) \\ 
+
+\bottomrule
+
+\end{tabular}
+
+\caption[Root mean squared errors for predictions of system performance after edge failures.]{\label{tab:ch3:errorEdges}Root mean squared errors for predictions of system performance after edge failures based on 100 holdout samples using simple and multiple regression models. Values in parentheses give 95\% confidence intervals.}
+
+\end{table}
+\vspace*{\fill}
+\end{landscape}
+%--------------------------------------------
+
+For node failure scenarios, the three topological models with undifferentiated components (D, E, and LCSG) result in the highest predictive errors.  The topological models with differentiated components (ENE, CL, and EN) provide slightly better estimates of AC-load curtailed.  The simplistic capacity models (PCL and PNS) and the physical flow model (DC) have significantly lower predictive errors than either category of topological models.  Of particular interest here is the relatively high predictive accuracy of the simplistic capacity model, Power Not Supplied (PNS).  This functional model does not require complete modeling of physical flows, yet it is still able to estimate the AC behavior of the system significantly better than the simpler topological models.  However, it is important to note that even the most complicated functional model, the DC load flow model, has a non-zero predictive error and is not able to completely capture the behavior of the system as based on the AC model.
+
+Similar patterns appear when using multiple functional model-performance measures to predict system behavior.  Combinations of functional model-performance measures encompassing less physical information about the system have lower predictive accuracy (\emph{i.e.}, higher predictive error) than combinations that include more physical details. Several combinations of functional model-performance measures are particularly interesting here.  The LCSG/D/EN/CL regression model uses only topologically-based functional models, so it is fairly simple both with respect to computation and data requirements. However, combining these functional model-performance measures provides an increase in predictive accuracy over any of the single functional model-performance measures; this increase becomes larger as the number of node failures increases.  The LCSG/D/EN/CL/PCL/PNS regression model combines topological models with simplistic capacity models; this combination of functional models-performance measures also increases the predictive accuracy of the regression model over any of the single function model-performance measures.  The increase is particularly significant when only one node fails in a given scenario, bringing the predictive error of the model close to zero.
+
+Results for the edge failure scenarios are similar to those for the node failure scenarios.  The topologically-based functional models again have high predictive error, but here there is less distinction between the predictive accuracy of topological models with differentiated and undifferentiated components.  The simplistic capacity models (PCL and PNS) have lower predictive error than the topological functional models, though PNS does not provide as large an improvement over PCL for edge failures as it did for node failures.  This difference may arise in part because simplistic capacity models do not incorporate capacity constraints for power lines; such constraints are likely to have a more significant effect on system behavior when it is subjected to edge failures than when it experiences node failures as fewer lines are available in the system to carry the power from generators to load.  Finally, as with the node failure scenarios, the DC load flow functional model results in low (but significant) predictive error.
+
+Overall, when combining multiple functional model-performance measures to predict system behavior for edge failures, there are larger improvements over single functional model-performance measure predictions than with node failures.  Here, all three combinations of topological functional model-performance measures (LCSG/D/E; LCSG/D/EN; LCSG/D/EN/CL) provide higher predictive accuracy for each level of edge removal than do any of the included single topological functional model-performance measures.  Again, because these functional model-performance measures are computationally simple, the benefits in increased predictive accuracy gained by combining several functional model-performance measures do not come at a high cost. Combining topological and simplistic capacity functional model-performance measures (CL/PCL/PNS; LCSG/D/EN/CL/PCL/PNS) also results in higher predictive accuracy than any of the included functional model-performance measures individually.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:ch3:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The results here clearly depict that the greater the inclusion of physical characteristics in the functional model, the better the estimate of the system’s actual performance when perturbed. Using more complicated performance measures does come at a cost, primarily in computational time but also with regards to the information about the system that is required. In the analysis, mean simulation times for a given node failure scenario ranged from 0.1 (0.1 for edge failure scenarios) seconds\footnote[9]{Simulations were performed using a single core of an Intel Xeon 5160 quad core 3.00 GHz processor.} for the simplest topological approaches to 1.2 (3.8 for edges) seconds for the DC load flow model and 3.5 (10.8 for edges) seconds for the AC load flow model. At first glance, these simulation times may all seem quite reasonable, but it is important to note that the test system is much smaller than real-world systems, and differences in simulation times between simple and advanced approaches will scale exponentially.
+
+The results shown in this paper do not imply that the more simplistic performance measures do not provide any useful information. As has been shown, several topologically-based performance measures that also include some physical information (\emph{i.e.}, power connection loss (PCL) and power not supplied (PNS)) provide similar results to the DC and AC load flow models in some situations. These measures are likely to provide reasonable representations of reality in complex, large-scale modeling situations in which physical flow modeling is prohibitively time-consuming. For example, suppose that a government is interested in emergency response planning for a specific natural hazard such as an earthquake or a hurricane.  In order to develop an appropriate plan, it is necessary to understand the potential direct impacts of the hazard on the power system as well as how these impacts interact with other lifeline systems such as communication and transportation.  Such considerations may necessitate iterating back and forth among multiple interdependent system models.  In this case, using a full power flow model is likely to make modeling efforts extremely computationally burdensome.  However, disaster response planners may be particularly interested in the ``worst-case scenario''. Certain topological measures discussed in this work (\emph{i.e.}, EN, ENE, and CL) nearly always overpredict the decrease in system performance after failures as compared to using a full AC model. Thus, these models will likely provide a reasonable upper bound on disaster consequences.  On the other hand, in a decision context where the goal is to identify critical system components for optimal improvement to power system reliability, it may be much more important to accurately predict system performance for a given scenario rather than identifying a reasonable upper bound for decreased system performance.  Although simpler topological models may accurately estimate expected system performance over the set of possible failure scenarios, their estimates for specific scenarios often deviate significantly from the performance predicted by physical flow models.  This could lead to incorrect rankings of component importance and sub-optimal allocation of resources for improving or protecting the system.  In this type of situation, therefore, it would be preferable to use a physical flow model.
+
+The results in this paper are based on a single test power system that is quite small in size. Therefore, in the future it may be beneficial to perform similar studies of power systems with a much larger number of components, such as the IEEE 300 bus system or the Western Interconnection of the United States. This would aid in validating the general conclusions drawn in the present paper, but would also provide insight as to how the simulation times for the different performance measures scale with the size of the system. Furthermore, it would be of interest to compare power systems of different types (\emph{e.g.}, transmission, sub-transmission, and distribution) to see how the performance measures described in this paper behave for these. In the future, this research will be extended to include similar studies for other types of critical infrastructures, such as water supply systems, telecommunication systems, and transport systems; comparisons between systems with uni-directional and bi-directional flows might be particularly interesting.  Additionally, a similar study could be performed which compares the use of topological models to physical flow models for understanding and evaluating interdependencies between multiple systems.
+
+Finally, the probability of numerous independent random failures occurring simulataneously in the real world is low.  The scenarios here are considered as a starting point for comparing topological and physical flow models for power system vulnerability analysis.  However, there are other potentially more realistic failure scenarios which should be examined in future work, including geographically correlated failures, as are common in natural disasters, and failures in high-impact system components, as might occur in a targeted attack.  Because the IEEE RTS 96 test system used here does not include geographic locations for system components, it is not possible to reasonably assess the performance of topological models for spatially correlated failures, but this is an important consideration for future work.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusions}
+\label{sec:ch3:conclusions}
+
+This paper presents a classification for different types of functional models that can be used for risk and vulnerability analysis of electric power systems. These approaches span from very simple topologically-oriented models to advanced models based on the engineering and physics of flows in the system. In order to compare the performance estimates achieved by these different types of functional models and performance measures, I performed a simulation study using the IEEE RTS 96 test power system. From this study, it can be concluded that while some performance measures may capture the average behavior of the system when perturbed, the accuracy of the performance estimates for specific scenarios may vary greatly. In other words, topology-based measures are of limited value in analyzing the robustness of particular power systems under specific failure scenarios. Hence, great care should be taken when using these types of approaches as inputs to decision-making for managing power system vulnerabilities. On the other hand, simplistic approaches sometimes allow for analysis of a broad spectrum of scenarios when assessing system vulnerability when such a range of scenarios may be too difficult to model with more complex methods. Accurate models of infrastructure performance are critical for infrastructure risk and vulnerability analysis, and further studies are needed to understand the trade-offs between fidelity and complexity for performance models for other types of critical infrastructure systems such as water, communication, and transportation systems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

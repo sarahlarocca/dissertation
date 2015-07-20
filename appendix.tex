@@ -1,0 +1,90 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Random network generation algorithms}
+\label{appA}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The following algorithms were used to randomly generate the networks used in Chapter \ref{ch2}. Algorithm 1 is a variation on the Bar\'{a}basi-Albert preferential attachment model \cite{Albert2002}.  Algorithm 2 uses acceptance-rejection sampling to generate nodal degree values adhering to the target degree distribution.
+
+\begin{algorithm}
+\small
+\caption{\textbf{Algorithm 1}}\label{alg:genNetwork}
+\begin{algorithmic}[1]
+
+\Procedure{GenerateNetwork}{$n,\gamma,\kappa$} \Comment{Generate a network s.t. $P(k) \sim k^{-\gamma}e^{-(k/\kappa)}$}
+
+\State $A \gets \mathbf{I_n}$ \Comment{Initialize adjacency matrix, $\mathcal{A}$}
+
+\For {$i \gets 1 \textrm{ to } n$}
+   \State {$k_i \gets \Call{GenerateDegree}{n,\gamma,\kappa}$} \Comment{Assign degree to node}
+\EndFor
+
+\State $\mathbf{c} \gets \mathbf{k}$	\Comment{List of remaining degree credits}
+\State $\mathbf{r} \gets 1 \textrm{ to } n$	\Comment{List of nodes with remaining degree credits}
+
+\While {$ length(\mathbf{r}) > 1 $}  \Comment{While at least 2 nodes have remaining degree credits}
+   \State $\mathbf{p} \gets \varnothing$  \Comment{List of probability of connection for each node}
+   \While {$\mathbf{p} = \varnothing$}
+      \State $\mathbf{m} \gets \{i | c_i = max(c)\}$ \Comment{List of nodes with maximum degree}
+      \State $v \gets \lfloor length(\mathbf{m})*rand\rfloor + 1$ \Comment{Randomly select one node from \textbf{m}}
+      \State $f \gets m_{v}$ \Comment{Select node f}
+      \State $\mathbf{t} \gets \{r_i | \mathcal{A}_{fr_i} = 0\}$ \Comment\parbox[t]{.5\linewidth}{\raggedleft List of nodes with remaining degree credits that are not connected to node f}
+
+      \If {$\mathbf{t} \neq \varnothing$}
+         \State $ \mathbf{s} \gets \{c_t, \forall \textrm{ }t \in \mathbf{t}\}$ \Comment\parbox[t]{.5\linewidth}{\raggedleft List of remaining degree credits for nodes not connected to node f}
+         \For {$i \gets 1 \textrm{ to } length(\mathbf{t})$}
+            \State $p_i \gets {c_t}_i/\sum\limits_j s_j$ \Comment\parbox[t]{.5\linewidth}{\raggedleft Connection probability for node $i$ equal to (number of remaining degree credits for node $i$)/(total remaining degree credits)}
+         \EndFor {}
+      \Else
+         \State $\mathbf{p} \gets \varnothing$
+      \EndIf
+   \EndWhile
+   \For {$i \gets 1 \textrm{ to } length(\mathbf{p})$}
+      \State {$ q \gets \sum\limits_{j=1}^i p_j$} \Comment{List of cumulative connection probabilities}
+   \EndFor
+   \Repeat
+      \State {$ w \gets rand$} \Comment {Generate a random number}
+      \State {$ y \gets 1 $} \Comment {Initialize index for $\mathbf{t}$}
+      \While {$ w > p_y \textrm{ AND } y < length(\mathbf{t}) $}
+         \State {$ y \gets y + 1$} \Comment {Increase index for $\mathbf{t}$}
+      \EndWhile
+      \State {$ g \gets t_y $} \Comment {Select node g}
+   \Until {$ A_{fg} = 0$} \Comment {Until no edge exists between node f and node g}
+   \State {$ A_{fg} \gets 1$}  \Comment {Assign an edge between node f and node g}
+   \State {$ A_{gf} \gets 1$}  \Comment {Assign an edge between node g and node f}
+   \State {$ c_f \gets c_f - 1 $} \Comment {Decrease remaining degree credits for node f by 1}
+   \State {$ c_g \gets c_g - 1 $} \Comment {Decrease remaining degree credits for node g by 1}
+   \If {$ c_f = 0 $} \Comment {If no degree credits remain for node f}
+      \State {$ \mathbf{r} \gets \{r_i | i \neq f\} $} \Comment {Remove node f from $\mathbf{r}$}
+   \EndIf
+   \If {$ c_g = 0 $} \Comment {If no degree credits remain for node g}
+      \State {$ \mathbf{r} \gets \{r_i | i \neq g\} $} \Comment {Remove node g from $\mathbf{r}$}
+   \EndIf 
+
+\EndWhile
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\vspace{10 mm}
+
+\begin{algorithm}
+\caption{\textbf{Algorithm 2}}\label{alg:genDegree}
+\begin{algorithmic}[1]
+\Function{GenerateDegree}{$n,\gamma,\kappa$} \Comment\parbox[t]{.5\linewidth}{\raggedleft Generate a nodal degree from the target distribution, $P(k) \sim k^{-\gamma}e^{-(k/\kappa)}$}
+
+\State {$Li_{\gamma}(e^{-1/\kappa}) \gets \sum\limits_{m=1}^{\infty} \frac{(e^{-1/\kappa})^m}{m^\gamma}$}
+
+\Repeat
+\State {$Y \gets \lfloor(n-1)*rand \rfloor + 1$}
+\State {$U \gets rand$}
+
+\State {$ f_Y \gets \frac{1}{Li_{\gamma}(e^{-1/\kappa})}Y^{-\gamma}e^{-Y/\kappa}$}
+\State {$ t_Y \gets \frac{1}{Li_{\gamma}(e^{-1/\kappa})}e^{-1/\kappa}$}
+\Until {$ U < f_Y/t_Y $}
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

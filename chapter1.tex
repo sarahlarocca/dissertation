@@ -1,0 +1,709 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter[Background]{Background \footnote[1]{The literature review in Section \ref{sec:ch1:networkreliability} was published as ``A Survey of Network Theoretic Approaches for Risk Analysis of Complex Infrastructure Systems'' in \emph{Vulnerability, Uncertainty, and Risk: Analysis, Modeling, and Management}, the conference proceedings of the First International Symposium on Uncertainty Modeling and Analysis and Management (ICVRAM 2011). \cite{LaRocca2011a}}}
+\label{ch1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:ch1:intro}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Critical infrastructure systems form the foundation for the economic prosperity, security, and public health of the modern world \cite{Rinaldi2004}. As such, failures within these complex, interdependent systems can pose a significant threat to society. Critical infrastructure systems can be broadly defined as physical entities that provide the basic services necessary for maintaining the health, security, economy, and environmental quality of the world. Examples of such systems include electric power, drinking water, wastewater, cellular communication, internet, and transportation. These examples can each be more generally classified into one of four categories of infrastructure: information and communication; transportation; energy; and water. These categories primarily represent physical systems, and are the traditional focus of infrastructure risk and reliability analyses. However, infrastructure can encompass other systems as well, such as banking and finance, safety and security, health services, government, manufacturing, and food supply \cite{PPD21}.
+
+Unfortunately, failures in infrastructure systems occur relatively frequently, arising from a variety of sources including natural disasters, terrorism, and accidents. In addition, aging poses a significant threat to infrastructure; the integrity of public infrastructure in the U.S. is deteriorating, with an estimated \$3.6 trillion in funding needed by 2020 \cite{ASCE2013}. Seemingly small or isolated infrastructure failures have the potential for far-reaching consequences. In May 2010, a ten-foot diameter water supply pipe broke, leaving two million residents of the Boston area without treated water for two and a half days. As a result, residents were forced to boil their water, and local restaurants experienced a drop in business of up to 25 percent \cite{Daley2010,Levenson2010}. Several years earlier, in August 2003, sagging power lines in Ohio caused a fire that triggered cascading failures through the electric power grid in the northeastern U.S and Canada, leaving 50 million customers without power. Other infrastructure systems dependent on the power system also experienced failures: banks were forced to close; computers could not operate; and cellular communications were interrupted (due to both loss of power in cell towers and system overload from increased call volume) \cite{Barron2003}. During Hurricane Katrina in August 2005, approximately 50 breaches occurred in levees throughout New Orleans. In addition, pumping stations failed to function due to loss of electric power, evacuation of pump operators, and flooding of the stations themselves. In total, 1,118 people were confirmed to have died in Louisiana as a direct result of the storm; direct property damage was estimated to be \$21 billion and public infrastructure damage was estimated to be \$6.7 billion. According to the ACSE, ``a large portion of the destruction from Hurricane Katrina was caused not only by the storm itself [\ldots] but also by the storm's exposure of engineering and engineering-related policy failures \cite{ASCE2007}.''  As demonstrated by these examples, failures of infrastructure system components can lead to devastating consequences. Thus, understanding the reliability of such systems has become an increasingly significant concern of decision-makers in both the public and private realms.  In this dissertation, I focus on electric power systems, but my approaches will translate to other infrastructure systems.
+
+There are two fairly distinct approaches for assessing the reliability and robustness of electric power systems. The first approach is that used by power system engineers, as described in Billinton and Allan (1992) \cite{Billinton1992}.  Billinton and Allan define reliability as the ``probability of a device performing its purpose adequately for the period of time intended under the operating conditions encountered."  An assessment of system-level reliability consistent with this definition consists of three components: 1) assessing the probability of each possible component failure state; 2) determining the system behavior resulting from each component failure state; and 3) combining the first two components to obtain an overall probabilistic index of system reliability.  Power engineering approaches typically incorporate capacity limits of system components as well as the physics governing power flow (\emph{i.e.}, Kirchhoff's laws).  However, such methods require detailed knowledge of the system being analyzed, and are often computationally prohibitive.
+
+The second approach is used by infrastructure risk analysts and network theorists.  In this approach, the focus is often on analyzing robustness (\emph{i.e.}, the degree of sensitivity of system performance to deviations from normal conditions) rather than reliability.  Unlike the three components of reliability assessment described above, assessing robustness generally consists only of determining the system behavior resulting from each possible component failure state; that is, there is no assessment of the probability of a given component failure state occurring.  Infrastructure and risk analysts often use a topological approach for describing the behavior of the system, ignoring physical constraints such as the rules governing power flow.  Topological methods are used because they require significantly less data and computational time than physically-based methods.  However, there has been little research as to whether such methods serve as a reasonable approximation for physical models; nor have there been attempts to incorporate topological methods into traditional power engineering approaches.  Both of these approaches have significant advantages and disadvantages when used independently.  Developing methods which combine the strengths of each of the current approaches will yield models that accurately reflect system behavior while still maintaining computational feasibility.
+
+Thus, the overall goal of my research is to develop and test innovative methods for modeling the reliability and robustness of infrastructure networks, with particular emphasis on electric power systems. There is a clear need for research in this area, as the integrity of public infrastructure in the United States and around the world is deteriorating, with an estimated \$3.6 trillion in funding needed in the U.S. by 2020 \cite{ASCE2013}. This dissertation addresses deficiencies in current methods for modeling infrastructure system robustness by developing approaches that reflect physical and engineering details governing network performance, yet are also scalable to complex systems covering large geographic areas. The objectives of my research are achieved through the completion of three projects. In Chapter \ref{ch2}, I determine the relationship between network topology and network robustness for randomly generated networks subjected to random and targeted failures. Next, in Chapter \ref{ch3}, I compare topological and physical performance models for quantifying the performance of electric power networks. Then, in Chapter \ref{ch4}, I use `Muir webs,' a concept taken from ecological network modeling, to model interdependent infrastructure system reliability. Finally, in Chapter \ref{ch5}, I summarize the research contributions of this dissertation and discuss the direction of future work.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Risk and reliability analysis}
+\label{sec:ch1:riskreliability}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This dissertation focuses on methods to support risk and reliability analysis for critical infrastructure systems. Risk analysis, like any scientific field, has its own unique lexicon. However, there is not always agreement between sources on the exact definition of common terminology. It is therefore important to define the meaning of some key terms before discussing detailed methodologies for assessing risk and reliability.  The following are the working definitions used in this thesis.
+
+\begin{defn}
+\emph{Risk} is the combination of uncertainty about and possible consequences of an event \cite{Aven2007, Aven2008}.
+\end{defn}
+
+\begin{defn}
+\emph{Reliability} is the probability that a system functions as normal (\emph{i.e.}, does not fail) \cite{Aven2008}.
+\end{defn}
+
+\begin{defn}
+\emph{Robustness} is the degree of sensitivity of system performance to deviations from normal conditions \cite{Aven2008}.
+\end{defn}
+
+\begin{defn}
+\emph{Resilience} is the degree to which a system to is able to recover or return to (or close to) its original state after a perturbation \cite{Hansson2003}.
+\end{defn}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Network reliability modeling}
+\label{sec:ch1:networkreliability}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A variety of modeling approaches are used to support risk and reliability analyses for infrastructure systems; commonly used methods include input-output modeling, network theory, decision analysis, simulation, and game theory.  Network theory, that is, the mathematical representation of networks as a collection of nodes and edges, is a particularly valuable tool for assessing infrastructure reliability, because most infrastructure systems naturally take the form of a physical, geographical, or logical network. A significant body of work exists in which network theory has been used to understand the effect of perturbations of individual network elements on the overall performance of an infrastructure system.  The majority of this work focuses on electric power systems \cite{Albert2004,Crucitti2004a,Crucitti2004b,Holmgren2006a,Holmgren2006b,Kinney2005,Motter2002a,Rosas-Casals2007,Shoji2009,Winkler2010}.  Additional infrastructure networks examined using network theoretic approaches include the Internet \cite{Crucitti2004a,Motter2002a} and the Tokyo gas supply system, water supply system, and sewerage system \cite{Shoji2009}.  Using network theory to assess the robustness of infrastructure networks does not necessitate any physical details about the system; the only data required is a simple mathematical description of the relationships between network components, as is described in the following section.  Thus, network theory can be used even when specific physical data for an infrastructure network is not available, such as is often the case with electric power systems due to security and economic concerns of power companies.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Network topology}
+\label{sec:ch1:networkreliability:networktopology}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A network, or graph, is described by $\mathcal{G}=\{\mathcal{V},\mathcal{E}\}$, where $\mathcal{V}$ is the set of vertices, or nodes, and $\mathcal{E}$ is the set of edges, or links.  For directed graphs, the elements of $\mathcal{E}$ are ordered pairs of distinct vertices, while for undirected graphs, the elements of $\mathcal{E}$ are unordered pairs of distinct vertices. For example, a traffic network of one-way streets can be represented by a directed graph, and a traffic network of two-way streets can be represented by an undirected graph.  Electric power transmission systems can also be represented easily as a graph; here, generators, substations, and junction poles are the set of vertices, $\mathcal{V}$, and the transmission lines are the set of edges, $\mathcal{E}$.
+
+The total number of nodes in a graph is equal to the number of elements in $\mathcal{V}$, that is, $N=|\mathcal{V}|$.  Correspondingly, the number of edges in a graph is equal to the number of elements in $\mathcal{E}$, that is, $M=|\mathcal{E}|$ \cite{Holme2002}.
+
+Any given graph can be uniquely represented by an $N \times N$ adjacency matrix, $A$.  If there exists an edge from some vertex $i$ to some vertex $j$, then the element $a_{ij}$ is 1; otherwise, it is 0.  Undirected graphs always have symmetric adjacency matrices.  In some applications, it is useful to not only specify whether an edge exists, but to assign the edge a value, typically a number in the range $(0,1]$; for instance, Crucitti \emph{et al.} \cite{Crucitti2004a,Crucitti2004b} use the value of $a_{ij}$ to represent varying levels of functionality in power transmission lines.
+
+Network topology can be described by a variety of measures which can be calculated from an adjacency matrix.  Four such measures are particularly useful for characterizing the structure of a network: degree distribution, betweenness centrality, clustering coefficient, and path length \cite{Albert2002}.
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Degree distribution}
+\label{sec:ch1:networkreliability:networktopology:degreedist}
+%--------------------------------------------
+
+The nodal degree, $k$, of a given node is defined as the number of edges that are incident the node; the mean degree of a network, $\langle k \rangle$, is defined as:
+%
+\begin{equation}
+\langle k\rangle=\frac{1}{N}\sum\limits_{i \in V}k_{i}.
+\end{equation}
+%
+Typically, the nodes in a given network do not all have the same degree; rather, the distribution of nodal degrees in the network can be described by some probability density function, $P(k)$, which gives the probability that a randomly selected node has exactly $k$ edges \cite{Albert2002}. For any network, it is possible to describe its degree distribution by some probability density function, $P(k)$.  The degree distribution of a random network follows a Poisson distribution, 
+%
+\begin{equation}
+P(k) \sim \frac{\lambda^{k}e^{-\lambda}}{k!}
+\end{equation}
+%
+where $k$ is nodal degree.  The family of the degree distribution of real-world networks varies with network type.  Amaral \emph{et al.} \cite{Amaral2000} present empirical evidence for three types of degree distributions in small-world networks: 1) power-law (scale-free networks); 2) power-law with cutoff (e.g. exponential or Gaussian) (broad-scale networks); and 3) exponential or Gaussian (single-scale networks).  Additionally, Clauset \emph{et al.} \cite{Clauset2009} describe the level to which a variety of real-world networks follow a power-law degree distribution (Table~\ref{tab:ch1:degreedist1}), described by
+
+\begin{equation}
+P(k) \sim k^{-\gamma}, 
+\end{equation}
+%
+where $\gamma$ is a constant. Additionally, empirical evidence indicates that nodal degree in many real networks is limited by the physical costs of adding links to a node. Such networks can be described by adding an exponential cutoff to the power-law distribution, that is,
+%
+\begin{equation}
+P(k) \sim k^{-\gamma}e^{-(k/\kappa)},
+\end{equation}
+%
+where $\kappa$ is the cutoff above which it becomes physically very costly to add links to a node \cite{Jeong2000, Newman2001, Clauset2009, Amaral2000}. Networks with a power-law degree distribution are also known as scale-free networks.
+
+Albert and Bar\'{a}basi \cite{Albert2002} present a summary of degree distribution parameters for real-world networks; a portion of this information is presented in Table~\ref{tab:ch1:degreedist2}.  Additionally, I have calculated the expected value of $k$ for each network using the size and distribution parameters provided.  The calculated values for $E[k]$ differ significantly from the values of $\langle k \rangle$ obtained from the real networks, illustrating the difficulties in fitting power-law distributions to real network data.
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{table}[!htp]
+\centering
+%\singlespacing
+
+\begin{tabular}{l l l}
+\toprule
+%
+\multirow{2}{*}{\textbf{Network}} & \multirow{2}{*}{\textbf{Data type}} & \textbf{Support for}\\
+                                  &                                     & \textbf{power-law}\\
+%
+\midrule
+%
+Birds & Continuous & Moderate\\
+Blackouts & Continuous & Moderate\\
+Book sales & Continuous & Moderate\\
+Calls & Discrete & With cutoff\\
+Citations & Discrete & Moderate\\
+Cities & Continuous & Moderate\\
+Email & Discrete & With cutoff\\
+Fires & Continuous & With cutoff\\
+Flares & Continuous & With cutoff\\
+HTTP & Continuous & None\\
+Internet & Discrete & With cutoff\\
+Metabolic & Discrete & None\\
+Papers & Discrete & Moderate\\
+Proteins & Discrete & Moderate\\
+Quakes & Continuous & With cutoff\\
+Religions & Continuous & Moderate\\
+Species & Discrete & With cutoff\\
+Surnames & Continuous & With cutoff\\
+Terrorism & Discrete & Moderate\\
+Wars & Continuous & Moderate\\
+Wealth & Continuous & None\\
+Web hits & Continuous & With cutoff\\
+Web links & Continuous & With cutoff\\
+Words & Discrete & Good\\
+%
+\bottomrule
+\end{tabular}
+
+\caption[Power-law behavior in real world networks]{\label{tab:ch1:degreedist1}Power-law behavior in real world networks, as judged by Clauset et al. The authors' judgment of the statistical support for the power-law hypothesis for each data set is defined as follows: \emph{none} indicates data sets that are probably not power-law distributed; \emph{moderate} indicates that the power-law is a good fit but that there are other plausible alternatives as well; \emph{good} indicates that the power-law is a good fit and that none of the alternatives considered is plausible; \emph{with cutoff} indicates that the power-law with exponential cutoff is clearly favored over the pure power-law \cite{Clauset2009}.}
+
+\end{table}
+
+%--------------------------------------------
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{table}[!htp]
+\centering
+%\singlespacing
+
+\begin{tabular}{lccccc}
+\toprule
+
+\textbf{Network} & \textbf{Size} & $\mathbf{\gamma}$ & $\mathbf{\kappa}$ & $\mathbf{\langle k \rangle}$ & $\mathbf{E[k]}$\\
+\midrule
+%
+WWW1 & 325,729 & 2.45 & 900 & 4.51 & 1.96\\
+WWW2 & 200,000,000 & 2.72 & 4,000 & 7.5 & 1.58\\
+Internet, domain & 3,015-4,389 & 2.1-2.2 & 30-40 & 3.42-3.76 & 1.93-2.19\\
+Internet, router 1 & 3,888 & 2.48 & 30 & 2.57 & 1.61\\
+Internet, router 2 & 150,000 & 2.4 & 60 & 2.66 & 1.79\\
+Movie actors & 212,250 & 2.3 & 900 & 28.78 & 2.36\\
+Coauthors, SPIRES & 56,627 & 1.2 & 1,100 & 173 & 75.73\\
+Coauthors, neuro & 209,293 & 2.1 & 400 & 11.54 & 3.05\\
+Coauthors, math & 70,975 & 2.5 & 120 & 3.9 & 1.74\\
+Metabolic, e. coli & 778 & 2.2 & 110 & 7.4 & 2.28\\
+Ythan estuary & 134 & 1.05 & 35 & 8.7 & 8.74\\
+Silwood park & 154 & 1.13 & 27 & 4.75 & 6.58\\
+%
+\bottomrule
+
+\end{tabular}
+
+\caption[Degree distribution parameters for real-world networks.]{\label{tab:ch1:degreedist2}Power-law (with exponential cutoff) degree distribution parameters for real-world networks \cite{Albert2002}.}
+\end{table}
+
+%--------------------------------------------
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Betweenness centrality}
+%--------------------------------------------
+
+Another important measure of network topology is the betweenness coefficient, which is defined as the total number of shortest paths passing through a given node.  Relatedly, the betweenness centrality of a node is defined as follows:
+%
+\begin{equation}
+Bc_{k}=\sum\limits_{i}\sum\limits_{j}\frac{\rho_{ikj}}{\rho_{ij}},      i \ne j \ne k,
+\end{equation}
+%
+where $\rho_{ij}$ is the number of shortest paths from node $i$ to node $j$ and $\rho_{ikj}$ is the number of these paths that pass through node $k$ \cite{Holme2002}. Betweenness, which is sometimes referred to as load (particularly with respect to electric power networks) \footnote[2]{This terminology is unfortunately confusing, as the use of the term `load' here does not have the same meaning as the traditional use of the word to mean the electric power demand by consumers.} \cite{Albert2004,Crucitti2004a,Crucitti2004b,Kinney2005,Motter2002a,Motter2002b,Pepyne2007,Simonsen2008} and betweenness centrality are useful measures of the importance of a node because they quantify the number of shortest paths that will become longer if the node is removed from the graph.
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Path length}
+%--------------------------------------------
+
+Average path length describes the mean of the shortest distance between all pairs of nodes in a network. That is,
+%
+\begin{equation}
+\ell_{\text{mean}}=\frac{1}{N(N-1)}\sum\limits_{i \in \mathcal{V}}\sum\limits_{j \in \mathcal{V}} d_{ij},
+\end{equation}
+%
+where $d_{ij}$ is the length of the shortest path (\emph{i.e.}, number of edges) between node $i$ and node $j$. A related topological parameter is the diameter of a network, where diameter is defined as the `longest shortest path,' that is:
+
+%
+\begin{equation}
+\ell_{\text{max}}=\max_{i,j}d_{ij}\cite{Weisstein2012}.
+\end{equation}
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Clustering coefficient}
+%--------------------------------------------
+
+The clustering coefficient was introduced by \cite{Watts1998} as a means of quantifying the degree to which nodes are clustered in a graph.  Suppose a node $i$ is connected to $k_{i}$ other nodes, or neighbors. Then the clustering coefficient for a given node $i$ is defined as follows:
+%
+\begin{equation}
+C_{i}=\frac{2\mathcal{E}_{i}}{k_{i}(k_{i}-1)},
+\end{equation}
+%
+where $\mathcal{E}_{i}$ is the actual number of edges that exist between each of the neighbors. A clustering coefficient equal to 1, implying that $\mathcal{E}_{i}=\frac{1}{2}k_{i}(k_{i}-1)$, indicates that every neighbor of node $i$ is connected to every other neighbor of node; that is, the neighbors of node $i$ form a complete clique.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Network robustness}
+
+The majority of existing approaches for assessing the robustness of real-world networks consist of some key components: 1) simulating or obtaining real data for a network model (\emph{e.g.}, a random graph or an electric power transmission grid); 2) measuring the topological characteristics of the network; 3) inducing random or targeted failures in network elements; and 4) assessing static and/or dynamic performance of the network, typically by means of additional topological characteristics.  Table \ref{tab:ch1:networkslit} presents a summary of past and current research in the field.
+
+%--------------------------------------------------------------------------
+
+\subsubsection{Modeling networks}
+
+There are a variety of ways to develop models for real-world networks. Ideally, we would always be able to use network models created directly from real-world systems with highly detailed data for analyzing robustness.  However, for multiple reasons, it is often difficult to obtain data: it may be highly sensitive (\emph{e.g.}, electric power grids), it may be poor quality (\emph{e.g.}, water distribution systems), or it may simply not exist (\emph{e.g.}, the Internet).  Additionally, even if perfect data existed for every system in the world, it would be computationally prohibitive to perform simulations for every individual network.  Therefore, it is sometimes useful to simulate networks whose properties are similar to real networks, in order to understand the effects of network topology on robustness \cite{Albert2000,Crucitti2004a,Duenas-Osorio2009,Estrada2006,Holme2002,Holmgren2006a,Motter2002a,Motter2002b,Pepyne2007}.
+
+Network theory has been used extensively for modeling robustness of a wide variety of networks, using both real and simulated data.  Examples of such networks include the Internet \cite{Motter2002a, Crucitti2004a}, food webs \cite{Sole2001, Montoya2006, Estrada2006}, electric transmission systems \cite{Motter2002a, Albert2004, Crucitti2004a, Kinney2005, Holmgren2006a, Pepyne2007, Rosas-Casals2007, Shoji2009, Simonsen2008, Duenas-Osorio2009, Winkler2010}, terrorist networks \cite{Qin2005, Shaikh2007}, cellular metabolic pathways \cite{Jeong2000, Jeong2001}, intravenous drug users \cite{Estrada2006}, and scientific collaboration \cite{Barabasi2002, Holme2002}.
+
+%--------------------------------------------------------------------------
+
+\subsubsection{Simulating failures}
+
+The assumptions used in simulating network failures vary among studies, but in general the result of a component failure is the removal of one or more network elements from the graph.  Two types of failures are often examined: random and targeted.  Random failures, sometimes referred to as errors \cite{Albert2000}, represent those resulting from natural phenomena; for example, random failures in an electric power system could be caused by operator errors, deterioration of aging components, or falling trees and limbs.  Typically, for a given iteration one node is randomly selected for removal, with every node having equal probability of being selected.  Network elements are randomly removed in this manner until some stopping criterion (\emph{e.g.}, fraction of nodes removed or network disconnection) is reached.  A variant on this approach involves assigning individual probabilities of failure to each network element using additional information, such as fragility curves \cite{Duenas-Osorio2009, Winkler2010}.
+
+Targeted failures, sometimes referred to as attacks \cite{Albert2000}, primarily represent intelligent threats (\emph{i.e.}, terrorism).  Because the goal of an attack is typically to cause the most damage possible, network elements are selected for removal in decreasing order of apparent importance.  The importance of a network element is usually measured by either degree or betweenness centrality.  After the most important network element has been removed from the network, subsequent elements are typically selected for removal in one of two ways: 1) the network element with the next highest importance as initially calculated (\emph{i.e.}, from the initial importance ranking of network elements) is chosen; or 2) importance (\emph{e.g.}, degree or betweenness) is recalculated for the remaining network elements and the network element with the new highest importance is chosen \cite{Holme2002}.  Again, network elements are removed in one of these manners until some stopping criterion is reached.
+
+Random and targeted failures can be imposed on both nodes and edges; however, in a given simulation, failures are generally restricted to one type of network element.  Node failures are most commonly considered, but studies of edge failures also exist \cite{Holme2002,Motter2002b,Pepyne2007,Simonsen2008}.
+
+%--------------------------------------------------------------------------
+
+\subsubsection{Measuring network performance}
+
+Network performance must be measured during and after failure simulations to quantify the robustness of a network.  A common measure of performance is the relative size of the largest connected component, $S_{r}=N_{S_{r}}/N_{S}$, where $N_{S}$ is the number of nodes in the largest connected component of the network prior to the failure(s) and $N_{S_r}$ is the number of nodes in the largest connected component of the network after the failure(s) \cite{Albert2000,Estrada2006,Holme2002,Holmgren2006a,Motter2002a,Rosas-Casals2007,Shoji2009,Simonsen2008,Winkler2010}.  Relatedly, the average size of isolated component clusters, $\langle s \rangle$, can also be calculated.
+
+Network efficiency is frequently used to measure performance when simulating cascading failures, and is defined as follows:
+%
+\begin{equation}
+E=\frac{1}{N(N-1)}\sum\limits_{i,j} \frac{1}{d_{ij}},
+\end{equation}
+%
+where $N$ is the number of nodes in the network and $d_{ij}$ is the distance of the shortest path between $i$ and $j$ \cite{Crucitti2004a,Crucitti2004b,Kinney2005,Motter2002b}.
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+% TABLE -------------------------------------
+
+\begin{landscape}
+\begin{table}[h!]
+\scriptsize
+\centering
+\resizebox{1.2\textheight}{!} {
+
+\begin{tabular}{lllllll}
+\toprule
+
+\multirow{2}{*}{\textbf{Reference}} & \multirow{2}{*}{\textbf{Network}} & \multirow{2}{*}{\textbf{Topology measures}} & \multirow{2}{*}{\textbf{Threat type}} & \textbf{Attack} & \textbf{Simulation} & \multirow{2}{*}{\textbf{Performance measure}} \\ 
+ &  &  &  & \textbf{element} & \textbf{type} & \\ 
+
+\midrule
+
+\multirow{2}{*}{Albert \emph{et al.} 2004 \cite{Albert2004}} & North American electric power & Degree & Random & Nodes & Static & Connectivity loss \\
+ &  & Load & Targeted (D,L) &  & Dynamic &  \\ \midrule
+\multirow{4}{*}{Crucitti \emph{et al.} 2004a \cite{Crucitti2004a}} & Erd\H{o}s-R\'{e}nyi & Degree & Random & Nodes & Dynamic & Network efficiency \\
+ & Barab\'{a}si-Albert & Load & Targeted (L) &  &  &  \\
+ & The Internet &  &  &  &  &  \\
+ & Western U.S. electric power &  &  &  &  &  \\ \midrule
+  & IEEE test power transmission & Degree & Random (F) & Nodes & Static & Connectivity loss \\
+Due\~{n}as-Osorio and & Synthetic electric transmission and & Clustering coefficient & Targeted (L) &  & Dynamic & Cascading susceptibility \\
+Vemuru 2009 \cite{Duenas-Osorio2009} & Synthetic electric transmission and & Redundancy ratio &  &  &  &  \\
+ & distribution systems & Network efficiency &  &  &  &  \\ \midrule
+\multirow{6}{*}{Estrada 2006 \cite{Estrada2006}} & Food web & Degree & Targeted (D,B) & Nodes & Static & Largest connected component \\
+ & Electronic circuit & Betweenness &  &  &  &  \\
+ & Protein structure & Spectral properties &  &  &  &  \\
+ & Drug users &  &  &  &  &  \\
+ & Gene transcription &  &  &  &  &  \\
+ & Random graph &  &  &  &  &  \\ \midrule
+\multirow{4}{*}{Holmgren 2006 \cite{Holmgren2006a}} & Erd\H{o}s-R\'{e}nyi & Degree & Random & Nodes & Static & Largest connected component \\
+ & Modified Barab\'{a}si-Albert & Mean path length & Targeted (D) &  &  &  \\
+ & Western U.S. electric power & Clustering coefficient &  &  &  &  \\
+ & Nordic power grid &  &  &  &  &  \\ \midrule
+\multirow{2}{*}{Kinney \emph{et al.} 2005 \cite{Kinney2005}} & North American electric power & Degree & Random & Nodes & Dynamic & Network efficiency \\
+ &  & Load & Targeted (L) &  &  &  \\ \midrule
+\multirow{4}{*}{Motter and Lai 2002 \cite{Motter2002a}} & Scale-free & Degree & Random & Nodes & Dynamic & Largest connected component \\
+ & Homogeneous & Load & Targeted (D,L) &  &  &  \\
+ & The Internet &  &  &  &  &  \\
+ & Western U.S. electric power &  &  &  &  &  \\ \midrule
+\multirow{3}{*}{Pepyne 2007 \cite{Pepyne2007}} & IEEE test power transmission & Clustering coefficient & Random & Edges & Dynamic & Line loading \\
+ & Synthetic small-world electric & Mean path length &  &  &  & Number of grid outages \\
+ & transmission systems & Load &  &  &  &  \\ \midrule
+\multirow{4}{*}{Rosas-Casals \emph{et al.} 2007 \cite{Rosas-Casals2007}} & European electric power grid & Degree & Random & Nodes & Static & Largest connected component \\
+ &  & Nearest neighbor degree & Targeted (D) &  &  &  \\
+ &  & Mean path length &  &  &  &  \\
+ &  & Clustering coefficient &  &  &  &  \\ \midrule
+\multirow{6}{*}{Shoji and Tabata 2007 \cite{Shoji2009}} & Tokyo electric power system & Degree & Random & Nodes & Static & Degree \\
+ & Tokyo gas supply system & Mean path length &  &  &  & Mean path length \\
+ & Tokyo water supply system & Clustering coefficient &  &  &  & Clustering coefficient \\
+ & Tokyo sewage system & Largest connected component &  &  &  & Largest connected component \\
+ &  & Mean size of isolated components &  &  &  & Mean size of isolated components \\
+ &  & Accessibility ratio &  &  &  & Accessibility ratio \\ \midrule
+\multirow{2}{*}{Simonsen \emph{et al.} 2008 \cite{Simonsen2008}} & UK electric power transmission grid & Degree & Random & Edges & Static & Largest connected component \\
+ & Northwestern U.S. power transmission grid & Load &  &  & Dynamic &  \\ \midrule
+\multirow{5}{*}{Winkler \emph{et al.} 2010 \cite{Winkler2010}} & Texas power transmission and & Degree & Random (F) & Nodes & Static & Betweenness loss \\
+ & distribution grids & Clustering coefficient &  &  &  & Largest connected component \\
+ & IEEE test power transmission systems & Network meshedness &  &  &  & Abnormally loaded nodes \\
+ &  & Network centralization &  &  &  &  \\
+ &  & Mean edge length &  &  &  &  \\
+
+
+\bottomrule
+
+\end{tabular}
+
+}
+
+\caption[Selected network theoretic approaches for modeling network vulnerability.]{\label{tab:ch1:networkslit}Selected network theoretic approaches for modeling network vulnerability. D = degree-based; L = load-based; F = fragility-curve based; B = betweenness-based; R = range-based.}
+\end{table}
+\end{landscape}
+
+
+%--------------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Summary of network reliability and robustness modeling}
+\label{sec:ch1:networkreliability:summary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Network theory is a powerful tool for assessing system reliability and robustness, and has been utilized in studying a variety of real-world networks, such as food webs, terrorist networks, and electric power systems.  Because it only requires knowledge of topological details about the system, it can be used for modeling system behavior even when specific physical data for an infrastructure network is not available, such as is often the case with electric power systems. Understanding the impact of network topology on robustness to failures has the potential to significantly aid the decision-making process for improvement efforts among multiple existing networks and resource allocation resources to those networks.  However, there have been no detailed studies of the impact of network topology on robustness to failures.  Thus, the goal of my work in Chapter \ref{ch2} is to determine the relationship between the initial topological properties of scale-free networks and their corresponding robustness to both random and targeted failures.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Electric power system reliability modeling}
+\label{sec:ch1:powerreliability}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Electric power systems}
+\label{sec:ch1:powerreliability:background}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Electric power systems are one of the most visible forms of infrastructure systems in modern society.  Power outages have the potential to negatively affect every corner of society and often result in significant economic consequences.  Examples of direct costs to households and business associated with power outages include: damage to electronic equipment from voltage spikes and surges; spoilage of items kept in controlled environments (e.g. refrigerated food); and unproductive time for manufacturing, service, and retail facilities \cite{ASCE2011}.  In addition, power outages have been shown to increase both accidental and nonaccidental (disease-related) deaths during outage durations \cite{Anderson2012}.  Thus understanding the reliability of electric power systems is of utmost importance.
+
+Electric power systems have changed dramatically since the first distribution system was built around Pearl Street Station by Thomas Edison in 1882.  Early systems, including the one at Pearl Street, distributed power from generators to nearby customers using direct current \cite{Brown2004}.  The adoption of alternating current (AC) allowed for the introduction of high voltage transmission lines in the 1890s, with a 20 mile, 11,000 volt AC line being built between Niagara Falls and Buffalo in 1896.  Since then, both the size and maximum voltages of transmission systems in the United States have increased steadily; today's transmission systems are comprised of 453,823 miles of lines, with voltages of up to 765 kV \cite{Brown2004,NERC2010}. Currently, there are three separate AC transmission systems covering the United States: the Western Interconnection, the Eastern Interconnection, and the Electricity Reliability Council of Texas Interconnection.  Within each of these systems, all electric utilities operate at a synchronized frequency of mean 60 Hz.
+
+As mentioned above, electric power is delivered from a source to a demand point via two types of systems:  transmission and distribution.  Transmission systems convey power at high voltages over long distances from generators to distribution substations.  \emph{Generation plants} typically produce power at voltages between 11 and 30 kV.  After leaving the generator, power is routed through a generation substation, which contains a step-up transformer to increases the voltage (typically to between 230 and 765 kV) to reduce resistive losses during transmission.  Between the generator and the distribution system, transmission lines may be routed through transmission switches, which allow rerouting of power flow within the system, or transmission substations, which step down voltages to transmission subsystem levels (typically 34.5 to 230 kV).  Once transmission lines have reached the vicinity of the distribution system, they are routed through a step-down transformer at the distribution substation.  From the distribution substation, the primary distribution system delivers power at between 4.16 and 34.5 kV to distribution transformers, which step down voltage to utilization levels. Power is then delivered to the end user (at 120V/240V single phase, 120V/208V three phase, or 277V/480V three phase) via secondary distribution lines.  Distribution systems typically have a radial structure, where power flows in only one direction.  Transmission systems, on the other hand, generally exhibit a more complex network structure, with numerous redundancies (that is, more than one path between two points).
+
+%--------------------------------------------------------------------------
+
+%--------------------------------------------
+\subsubsection{Alternating current}
+%--------------------------------------------
+
+Modern electric power systems operate using alternating current to allow for easy transformation of voltage.  In a simple AC circuit, both voltage and current are sinusoidal, and can be described as a function of time as follows,
+
+\begin{equation}
+v(t) = V\sin(\omega t + \phi)
+\end{equation}
+%
+and
+%
+\begin{equation}
+i(t) = I\cos(\omega t + \theta),
+\end{equation}
+%
+where $v(t)$ is instantaneous voltage, $V$ is the voltage amplitude, $\omega$ is angular velocity, $t$ is time, $\phi$ is the voltage phase angle, $i(t)$ is instantaneous current, $I$ is current amplitude, and $\theta$ is the current phase angle. We can then describe instantaneous power as the product of instantaneous voltage and instantaneous current, that is,
+
+\begin{equation}
+p(t) = v(t)i(t),
+\end{equation}
+%
+which evaluates to:
+%
+\begin{equation}
+p(t) = \frac{1}{2}\mathrm{Re}[VI^*] = \frac{1}{2}\lvert V\rvert \lvert I\rvert [\cos(\phi - \theta)+\cos(2\omega t + \phi + \theta)].
+\end{equation}
+%
+Because the time-dependent portion of $p(t)$ averages to zero over one cycle, it contributes nothing to the value of time-average power.  Thus, \emph{real power} is given by the time-variant portion of $p(t)$, giving us:
+
+\begin{equation}
+P = \frac{1}{2}\mathrm{Re}[VI^*] = \frac{1}{2}\lvert V\rvert \lvert I\rvert \cos(\phi - \theta).
+\end{equation}
+%
+Now, let $S = P + jQ$, letting $P$ be the real component of $S$ and $Q$ being the imaginary component of $S$.  We define $S$ as \emph{complex power}, $P$ is real power, as given above, and $Q$ as \emph{reactive power}.  Then we have:
+%
+\begin{equation}
+S = \frac{1}{2} VI^*,
+\end{equation}
+%
+and
+%
+\begin{equation}
+Q = \frac{1}{2}\mathrm{Im}[VI^*].
+\end{equation}
+%
+The magnitude of $S$ gives us \emph{apparent power},
+%
+\begin{equation}
+\lvert S\rvert = \frac{1}{2}\lvert V\rvert \lvert I\rvert.
+\end{equation}
+%
+The ratio between real power and apparent power is called the \emph{power factor}:
+
+\begin{equation}
+\frac{P}{\lvert S\rvert}  = \cos(\phi - \theta).
+\end{equation}
+
+Most transmission systems operate on three-phase AC, rather than single-phase, as has been described above.  Three-phase instantaneous voltages can be represented as follows:
+
+\begin{equation}
+v_a(t) = V\cos(\omega t)
+\end{equation}
+%
+\begin{equation}
+v_b(t) = V\cos(\omega t - \frac{2\pi}{3})
+\end{equation}
+%
+\begin{equation}
+v_c (t)= V\cos(\omega t +\frac{2\pi}{3}).
+\end{equation}
+%
+Instantaneous current and instantaneous power follow similarly from above.  Total instantaneous power is the sum of instantaneous power from each of the three phases, given as
+%
+\begin{equation}
+p(t) = p_a(t) + p_b(t) + p_c(t).
+\end{equation}
+%
+
+%--------------------------------------------------------------------------
+
+\subsubsection{Load flow}
+For the purpose of studying load flow, power systems are typically represented as a network of buses (nodes) and lines (links).  A bus can represent any of the following:  a generator supplying real power to the network (and either supplying or absorbing reactive power); a load absorbing real power from the network (and either absorbing or supplying reactive power); inductive or capacitive devices for voltage control; or rotating machinery capable of supplying or absorbing real and reactive power.  In load flow analysis, three-phase systems are typically represented by a single-phase equivalent.  Additionally, the “per-unit” system is generally employed; that is, a predefined base quantity is selected for voltage and volt-amperes, and all quantities are then expressed in terms of these base units.  For example, if $V_{base}$ is the selected voltage base and $VA_{base}$ is the selected volt-ampere base, then we have current and impedance as follows:
+
+\begin{equation}
+I_{base} = \frac{VA_{base}}{V_{base}}
+\end{equation}
+
+\begin{equation}
+Z_{base} = \frac{V_{base}}{I_{base}} = \frac{{V_{base}}^2}{VA_{base}}
+\end{equation}.
+
+Power flow within a network is governed by the voltage at each bus and the impedance (or its inverse, admittance, $Y$) of the lines between buses.  To analyze load flow, it is helpful to construct a matrix describing bus admittance, defined as follows:
+
+\begin{equation}
+\mathbf{Y} = \mathbf{NI \ Y_\ell \ NI^{\prime}}, 
+\end{equation}
+%	
+where $\mathbf{NI}$ is the node incidence matrix, describing the connectivity of the lines to buses, with $ni_{b\ell }= 1$ if bus $b$ is on the “sending” end of line $\ell$, $ni_{b\ell }= -1$ if bus $b$ is on the “receiving” end of line $\ell$, and $ni_{b\ell }= 0$ otherwise.  $\mathbf{Y_\ell}$ is the line admittance matrix, where for all $k$, the diagonal element, $Y_{\ell_k}$ is the admittance of line $k$, $\frac{1}{Z_k}$.
+
+Now let $\mathbf{I}$ be the vector of bus currents (\emph{i.e.}, the injected current at each bus) and $\mathbf{V}$ be the vector of bus voltages.  This gives us:
+
+\begin{equation}
+\mathbf{I} = \mathbf{Y} \cdot \mathbf{V}.
+\end{equation}
+%
+And, we can describe the current for bus $k$ in a network with $n$ buses as:
+%
+\begin{equation}
+\mathbf{I}_k  = \sum\limits_{j = 1}^n {\mathbf{Y}_{jk}\mathbf{V}_j}.
+\label{eq:power1}
+\end{equation}
+%
+Finally, we have:
+%
+\begin{equation}
+\mathbf{S}^{*}_k = \mathbf{V}^{*}_k \mathbf{I}_k,
+\label{eq:power2}
+\end{equation}
+%
+where $\mathbf{S^*}$ is the complex conjugate of complex power, and $\mathbf{V^*}$ is the complex conjugate of voltage.  To conduct load flow analysis, we must solve Equations \ref{eq:power1} and \ref{eq:power2}.  For each bus in the system, it is necessary to initially specify two of four values: real power ($P$), reactive power ($Q$), voltage magnitude ($\lvert V\rvert$), and voltage phase angle ($\phi$).  Each bus in the system can be classified as either a \emph{generator} bus or a \emph{load} bus.  For generator buses, we typically specify the real power and the voltage magnitude at the generator terminal; hence, we must solve for reactive power and voltage phase angle.  For load buses, we specify real power and reactive power, solving for voltage magnitude and voltage phase angle.  One generator bus in the system is arbitrarily selected to be classified as a third type of bus: the \emph{slack} bus.  For the slack bus, we specify voltage magnitude and voltage phase angle.  By leaving the real and reactive power unconstrained, the slack bus serves as a power source or sink to accommodate for unknown losses of real power in the lines or excess generated power \cite{Powell2005}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Topological studies of reliability}
+\label{sec:ch1:powerreliability:topology}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Albert \emph{et al.} (2004) \cite{Albert2004} was one of the first papers to use a purely topological approach to assess the robustness of electric power systems.  In this work, the authors represent the North American transmission grid as a network and simulate the effects of failures, both random and targeted, on the network's performance.  Their approach is  different from approaches used with other types of networks, because their network representation distinguishes between different types of nodes. Specifically, they describe nodes in their system as one of three types of substations: generators, transmission substations, and distribution substations.  This allows them to introduce a new measure of system performance for electric power systems, known as connectivity loss and defined as follows:
+%
+\begin{equation}
+C_L=1-\frac{1}{N_{D}}\sum\limits_{i}^{N_{D}} \frac{N_{G}^{i}}{N_{G}},
+\end{equation}
+%
+where $N_{G}$ is the total number of generators, $N_{D}$ is the total number of distribution substations, and $N_{G}^{i}$ is the number of generators connected to substation $i$.  The purpose of the connectivity loss measure is to quantify the decrease of the ability of distribution substations to receive power from the generators \cite{Albert2004}. A number of similar studies have been conducted using various combinations of real power system data and performance measures previously described; this work is summarized in Table \ref{tab:ch1:electricTopology}.
+
+%-----------------------------------------------------------------------------------------------------
+% TABLE %---------------------------------------------------------------------------------------------
+
+\begin{table}[h!]
+\centering
+\footnotesize
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Reference} & \textbf{Networks} & \textbf{Performance measures}\\
+\midrule
+Albert \emph{et al.} (2004) & North American power system & Connectivity loss\\
+\multirow{2}{*}{Arianos \emph{et al.} (2009)} & \multirow{2}{*}{IEEE test systems} & Efficiency\\
+ & & Net-ability\\
+\multirow{2}{*}{Hines \emph{et al.} (2011)} & Eastern U.S. power system & Average path length\\
+ & IEEE test system & Connectivity loss\\
+\multirow{2}{*}{Holmgren \emph{et al.} (2006)} & Nordic power system & Average path length\\
+ & Western U.S. power system & Largest connected component\\
+\multirow{2}{*}{Jenelius \emph{et al.} (2004)} & Nordic power system & Average path length\\
+ & Western U.S. power system & Largest connected component\\
+Rosas-Casals \emph{et al.} (2007) & European power systems & Largest connected component\\
+Sol\'{e} \emph{et al.} (2008) & European power systems & Largest connected component\\
+\multirow{2}{*}{Winkler \emph{et al.} (2009)} & \multirow{2}{*}{Texas power systems} & Betweenness\\
+ & & Largest connected component \\
+\bottomrule
+
+\end{tabular}
+
+\caption{\label{tab:ch1:electricTopology}Summary of topologically-based studies of electric power system robustness.}
+\end{table}
+
+%-----------------------------------------------------------------------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Engineering studies of reliability}
+\label{sec:ch1:powerreliability:engineering}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Traditional electrical engineering approaches for modeling power systems differ from many of the topological approaches described above in that they model system reliability rather than robustness.  Common measures of reliability for power systems include: loss of load probability (LOLP) and loss of load expectation (LOLE) for generation and transmission; and system average interruption frequency index (SAIFI) and system average interruption duration index (SAIDI) for distribution \cite{Allan1994}.  
+
+The most accurate way to represent the real-world behavior of a power system is to use AC power flow analysis.  However, AC power flow is described by nonlinear equations for which convergent solutions are often difficult to obtain; solving AC power flow requires significant computational resources and time which are often prohibitive, particularly in large scale reliability simulations \cite{Overbye2004}. As a result, a DC approximation is often used to model AC power flow; the relative simplicity of the DC equations combined with their linearity allows a direct (\emph{i.e.}, non-iterative) solution to be obtained quickly \cite{Purchala2005}.  In many situations, a DC approximation yields a solution that is very similar to or even the same as the true behavior of the system. However, there are significant assumptions involved in using DC power flow to represent AC systems, described as follows:
+
+\begin{itemize}
+\item \textbf{Real power only.} Reactive power flows are ignored entirely.
+\item \textbf{Flat voltage profile.} Assume that the voltage magnitudes of all buses are equal to 1.0 p.u. (per-unit).
+\item \textbf{Small voltage angles.} If voltage angle, $\phi$, is sufficiently small, then we can assume $sin \phi \approx \phi$.
+\item \textbf{Lossless lines.} Assume that resistance, $R$, is much smaller than reactance, $X$, and can therefore be ignored, leading to the assumption of lossless lines \cite{Overbye2004,Purchala2005}.
+\end{itemize}
+
+Because of these assumptions, DC power flow solutions may sometimes diverge significantly from the true AC power flow solution. Several studies examine the effects of these assumptions and discuss situations in which the DC power flow approximation may not be ideal. Overbye \emph{et al.} (2004)\cite{Overbye2004} presents two case studies in which the authors compare locational marginal prices (LMPs) calculated with an AC power flow model and a DC power flow model. In their small 37-bus test system, they found that for the base load case, the MW line flows from the DC solution matched reasonably well with the MVA line flows from the AC solution, with the exception of two discrepancies.  Both of the discrepancies occurred on lines with high reactive power flow and low real power flow.  With the much larger (12,925-bus) Midwest U.S. system, their results were similar: the largest error for the DC solution occured on a line connecting a large capacitor to the rest of the system, meaning that the entire flow on the line was reactive and thus had been ignored in the DC approximation.  Similarly, Stott \emph{et al.} (2009)\cite{Stott2009} conducted a study with six large power systems in which they compared the solutions of several variations of DC approximations to the solutions of an AC power flow model.  They found that the most common source of large errors occurred in situations with heavy loading on areas where the ratio of resistance to reactance ($R:X$) varied significantly between lines. Despite this evidence for potential inaccuracies, DC power flow as an approximation for AC power flow is a very common approach for evaluating power system reliability \cite{Dobson2001, Carreras2002a, Dobson2002, Dobson2003, Salmeron2004, Bier2007, Dobson2007, Pepyne2007, Arianos2009, Salmeron2009, Hines2010}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Cascading failures}
+\label{sec:ch1:powerreliability:cascades}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Accurate power flow solutions are particularly important when assessing system reliability and robustness, because line or bus failures can cause a redistribution of flows throughout the system. When this happens, other system elements can become overloaded and thus also fail. This can lead to a series of cascading overload-related failures throughout the system, potentially causing a collapse of the entire system (\emph{i.e.}, a blackout).  The IEEE PES CAMS Task Force on Understanding, Prediction, Mitigation and Restoration of Cascading Failures defines a cascading failure as ``a sequence of dependent failures of individual components that successively weakens the power system \cite{Baldick2008}.''  The traditional standard for power system robustness  is the $N-1$ criterion: power systems are designed in such a way that if any single element of the system fails, the system can continue to operate without other elements becoming overloaded.  However, in the case of extreme events such as natural disasters or terrorism, more than one element of the system may fail, allowing for cascades to occur.
+
+Identifying all possible cascading failure scenarios that lead to blackouts is extremely difficult for real-world power systems, because the number of combinations of events that must be evaluated (and for which a power flow model must be run) is computationally infeasible \cite{Baldick2008}.  Dobson \emph{et al.} (2001) develop a relatively simple model for cascading failures, referred to as the OPA (ORNL-PSERC-Alaska) model. The OPA approach is formulated as follows: 1) solve power flow base case for initial system; 2) induce a random outage; 3) solve for new optimal power flow using linear programming (\emph{i.e.}, a DC approximation of power flow); 4) induce failures with probability $p$ for all elements that have become overloaded; 5) if new outages occur, return to step 3, otherwise stop \cite{Dobson2001}.  The OPA model is used in many subsequent papers \cite{Carreras2001, Carreras2002a, Carreras2002b, Dobson2007}, however it is only applied to small test systems on the order of 100 nodes. Chen \emph{et al.} (2005) expand OPA to incorporate ``hidden failures," which occur when a relay has an undetected defect that remains dormant until abnormal operating conditions occur \cite{Chen2005}.  Such failures are important to consider, because according to a NERC study of major power system disturbances, more than 70\% involved relaying systems \cite{Chen2005}. Another related study by Nedic \emph{et al.} (2006) further expands the OPA model by not only including hidden failures (referred to in this paper as ``sympathetic trippings''), but by using an AC power flow model rather than a DC approximation. This expanded version is used to model a 1,000 bus test case representing a large European system, which is significantly larger than the systems used in previous studies.
+
+As previously discussed, it can be computationally prohibitive to run power flow models for large systems and/or complex failure scenarios, even when using DC approximations. Motter and Lai (2002) introduce a method for incorporating cascading failures into pure topological methods for evaluating network robustness \cite{Motter2002a}. They define the capacity of each node in the network as follows:
+%
+\begin{equation}
+\mathcal{C}_{i}=\alpha L_{i},
+\end{equation}
+%
+where $\alpha$ is a tolerance parameter of the network and $L_{i}$ is the initial load on the node. They define ``load" as being equal to nodal betweenness, that is, the total number of shortest paths passing through a node. Their modeling approach is then similar to that described above for the OPA model, except they use recalculated values of load to check for exceedances, rather than a power flow model. Additionally, their approach differs from the OPA approach in that they examine node overloads, while the OPA approach examines line overloads. The Motter and Lai approach is used in the majority of topological studies of cascading failures in networks \cite{Crucitti2004a, Crucitti2004b, Kinney2005, Bao2008, Motter2008, Simonsen2008, Sun2008, Duenas-Osorio2009}.  Wang \emph{et al.} (2008) use a similar approach, but they define the initial ``load" of node $j$ as:
+%
+\begin{equation}
+L_{j}=ak_{j}^{\alpha},
+\end{equation}
+%
+where $a$ and $\alpha$ are tunable parameters. Then, if node $i$ fails, load is redistributed to its neighbor nodes in proportion to their initial load, that is:
+%
+\begin{equation}
+\Delta L_{j_i}=L_i \frac{k_j^{\alpha}}{\sum \limits_{m \in \Gamma_i} k_m^{\alpha}},
+\end{equation}
+%
+where $\Delta L_{j_i}$ is the additional load received at node $j$ as a result of the failure of node $i$ and $\Gamma_i$ is the set of all neighboring nodes of $i$ \cite{Wang2008d}. Wang and Chen (2008) propose another similar approach for edge failures, defining the flow on a given edge as $(k_ik_j)^\theta$, where $k_i$ and $k_j$ are the degree of nodes $i$ and $j$, respectively, and $\theta$ is a tunable parameter \cite{Wang2008b}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Summary of electric power system reliability modeling}
+\label{sec:ch1:powerreliability:summary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Electric power systems are highly complex systems that are critical to the functioning of society.  Although the physics governing power flow is well understood, modeling the reliability of power systems poses a challenging task due to large data requirements and high computational complexity.  In addition, there are two fairly distinct research communities (power system engineers and risk and reliability analysts) studying power system reliability whose work tends not to overlap, leaving disadvantages in both approaches.  Thus, bridging the gap between topological approaches and engineering studies is an important area in which to focus research.  The goals of the work presented in Chapter \ref{ch3} are therefore: a) to understand the tradeoffs between simplicity and fidelity implicit in the use of various topological and physical performance models for quantifying the performance of electric power networks; and b) to develop statistical models which combine the strengths of existing approaches to yield a model that accurately reflects system behavior while still maintaining computational feasibility.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interdependent infrastructure reliability modeling}
+\label{sec:ch1:interdependentreliability}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Critical infrastructures are defined by the USA PATRIOT Act of 2001 (Patriot Act) as ``systems and assets, whether physical or virtual, so vital to the United States that the incapacity or destruction of such systems and assets would have a debilitating impact on security, national economic security, national public health or safety, or any combination of those matters\cite{Patriot2001}.'' The U.S. Department of Homeland Security (DHS), which also utilizes this definition of critical infrastructure, has identified eighteen sectors in which ``direct terrorist attacks and natural, manmade, or technological hazards could produce catastrophic losses in terms of human casualties, property destruction, and economic effects, as well as profound damage to public morale and confidence\cite{DHS2006}.''  These critical infrastructure sectors are as follows: agriculture and food; banking and finance; chemical; commercial facilities; communications; critical manufacturing; dams; defense industrial base; emergency services; energy; government facilities; healthcare and public health; information technology; national monuments and icons; nuclear reactors, materials, and waste; postal and shipping; transportation systems; and water \cite{DHS2006}. The Patriot Act calls for ``modeling, simulation, and analysis of the systems comprising critical infrastructures [\ldots] in order to enhance understanding of the large-scale complexity of such systems\cite{Patriot2001}.''  While progress has been made towards this goal, the high degree of complexity of infrastructure systems remains a significant obstacle.
+
+Modeling the reliability of infrastructure systems can be difficult for several reasons.  Many systems span a very large geographic scale, but require detailed modeling at a much smaller scale to accurately understand system behavior, creating very computationally burdensome problems.  For example, power transmission and distribution systems may span hundreds of miles, but in order to predict power outages in a useful way, it is often necessary to model the behavior of the system at a scale of hundreds of feet.  Another difficulty that arises in modeling infrastructure systems is the number of dependencies and interdependencies that exist within and between systems.  A \emph{dependency} can be defined as ``a linkage or connection between two infrastructures, through which the state of one infrastructure influences or is correlated with the state of the other\cite{Rinaldi2001}."   Dependencies and interdependencies are typically classified into four categories, as introduced by Rinaldi \emph{et al.} (2001): physical, geographical, cyber, and logical \cite{Rinaldi2001}.  Physical dependencies are those where a physical linkage exists between two systems; for example, a line supplying electric power is needed for a pump in a drinking water system to function.  Geographical interdependencies apply to two or more collocated system elements whose state can be changed by a single local event.  Certain infrastructure systems, such as natural gas pipelines and electric power transmission lines, are frequently collocated due to sharing a right-of-way; in the event of a natural disaster such as an earthquake, ground shaking at a given location can cause damage to the foundations of both the pipeline and the transmission tower.  Cyber dependencies are those where a system element requires the receipt of information from an information infrastructure, such as a supervisory control and data aquisition (SCADA) system. For example, power transmission and distribution systems depend on SCADA systems for control of switches and other system elements; in turn, the SCADA system requires power to operate.  Logical dependencies represent links between multiple systems that cannot be described as physical, geographical, or cyber.  Logical dependencies are often related to human decisions, such as policy, legal, and regulatory regimes, as well as public behavior \cite{Rinaldi2001,Rinaldi2004}.
+
+A variety of modeling approaches have been used to tackle the problem of modeling interdependent infrastructure systems.  Commonly used methods include input-output modeling, network theory, decision analysis, simulation, and game theory; these methods are summarized in the following sections.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Inoperability input-output modeling}
+\label{sec:ch1:interdependentreliability:iim}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Inoperability input-output models (IIM) were first introduced by Haimes and Jiang \cite{Haimes2001}.  The methodology is based on the classic Leontief input-output (I/O) model which is used to describe the equilibrium behavior of both regional and national economies.  The Leontief I/O model is defined as follows:
+%
+\begin{equation}
+\mathbf{x} = \mathbf{Ax} + \mathbf{c} \Leftrightarrow \{x_i = \sum_{j=1}^n a_{ij}x_j + c_j \} \forall i,
+\end{equation}
+%
+where $n$ is the number of industries; $x_{i}$ is the total production output of industry $i$; $a_{ij}$ is the ratio of input of industry $i$ to industry $j$; and $c_i$  is the final demand for the $i^{th}$ industry (that is, the portion of $i$'s total output for final consumption by end users) \cite{Haimes2005}.  This model formulation is based on the assumption that inputs of both goods and resources required to produce any commodity are proportional to the output of the commodity \cite{Haimes2001}.
+
+The IIM proposed by Haimes follows a similar construct to the Leontief model.  However, instead of considering a system of $n$ industries each producing one good as output, the IIM considers a system of $n$ intra- and interconnected infrastructures with an output of \emph{risk of inoperability} \cite{Haimes2001}.  Haimes defines \emph{inoperability} as ``the inability of the system to perform its intended functions."  In the IIM, inoperability is expressed as a percentage of the system's ``as-planned" level of operation; a value of 0 corresponds to a flawless operable system state and a value of 1 corresponds to the system being completely inoperable.  The physical-based IIM can then be defined as follows:
+%
+\begin{equation}
+\mathbf{x^P} = \mathbf{A^Px^P} + \mathbf{c^P} \Leftrightarrow \{x^P_i = \sum_{j=1}^n a^P_{ij}x^P_j + c^P_j \} \forall i,
+\end{equation}
+%
+where $x^P_i$ is the overall risk of inoperability of infrastructure $i$; $a^P_{ij}$ is the probability of inoperability that the $i^{th}$ infrastructure contributes to the $j^{th}$ infrastructure due to the complexity of their interdependence; and $c_i$ is the risk of inoperability of system $i$ from intradependencies within the system as well as from natural disasters, accidents, and intentional attacks.
+
+IIMs have been used for a variety of applications.  Haimes \emph{et al.} (2005)\cite{Haimes2005} use IIMs to evaluate infrastructure sectors susceptible to a high-altitude electromagnetic pulse (HEMP) attack, with specific focus on power systems.  Pant \emph{et al.} (2001) \cite{Pant2011} use IIMs to examine the effects of disruptions at an inland port terminal on commodity flows.  Santos and Haimes (2004) \cite{Santos2004} use an IIM to rank infrastructure sectors in order of impact from air travel disturbances due to terrorism. Lian and Haimes (2006)\cite{Lian2006} use a similar approach with a dynamic IIM, which incorporates time, to examine the widespread impacts of a terrorist event directly affecting the truck transportation sector, the broadcasting and telecommunications sector, and the utilities sector.  Barker and Haimes (2009)\cite{Barker2009} develop an approach for incorporating uncertainty into a dynamic IIM.
+
+IIMs are useful for comparing the impacts of a given perturbation scenario in various geographic regions.  They also allow for an examination of variations in recovery rates for different infrastructure sectors and provide an simple method for quantifying economic losses due to infrastructure failures.  However, one major weakness of IIMs is that they are extremely coarse in scale; at best they provide insight into infrastructure performance at a regional level.  They provide no physical information about infrastructure systems after failures, which prevents them for being used to aid in recovery efforts or to make optimal improvements to specific elements of infrastructure systems (though they are useful for allocating resources to entire infrastructure sectors).  Additionally, IIMs assume linearity between economic impacts and physical performance, which may not always be realistic.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Network theory}
+\label{sec:ch1:interdependentreliability:networks}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As is described in Section \ref{sec:ch1:networkreliability}, network theoretic approaches are commonly used to model infrastructure systems.  Much of the work in this area has focused on single infrastructure systems - electric power systems, in particular.  However, there is a growing body of research that uses network theory to examine multiple, interdependent infrastructure systems.  Due\~{n}as-Osorio \emph{et al.} (2007) \cite{Duenas-Osorio2007} characterize the topology of two very small interdependent infrastructure systems: a water distribution system and a power transmission system.  The change in topology of the networks is calculated following random and targeted removal of nodes in the coupled networks.  Additionally, the authors introduce a parameter which can be used to adjust the overall level of interdependence between the two networks.  A similar idea is also presented in Hern\'{a}ndez-Fajardo and Due\~{n}as-Osorio (2010)\cite{Hernandez-Fajardo2010}.  Here, an \emph{interdependence parameter} specifies the probability that an element in one system is dependent on an element in another system.  With this parameter, failure propagation from one network to another is stochastic, rather than deterministic.
+
+Buldyrev \emph{et al.} (2010)\cite{Buldyrev2010} derive an analytical solution for the critical fraction of removed nodes required to cause a cascade of failures and lead to a complete fragmentation of two interdependent networks.  The authors find that, contrary to the behavior of a single infrastructure network, interdependent networks exhibit higher vulnerability with a broader degree distribution.  Brummitt \emph{et al.} (2011)\cite{Brummitt2011} estimate the optimal level of interdependence between two infrastructure systems.  They find that some connectivity between systems is beneficial, because it suppresses large cascades; however, too much connectivity increases the size of cascades.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Decision analysis}
+\label{sec:ch1:interdependentreliability:da}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In studying infrastructure interdependence, decision analytic frameworks are frequently used both on their own and in conjunction with other methods to provide a tool for using vulnerability information for decision-making.  Apostolakis and Lemon (2005)\cite{Apostolakis2005} develop a methodology for identifying and prioritizing vulnerabilities in multiple infrastructure systems.  The first step of their method involves identifying the infrastructure systems that need protection, and then finding all minimum cut sets, or vulnerabilities, which will lead to a service interruption in one or more of these systems.  Next, multi-attribute utility theory (MAUT) is used to determine the ``value" of each vulnerability to the decisionmakers; here, ``value" is separate from the conditional probability of a successful attack.  A performance index is elicited from decisionmakers for each vulnerability, resulting in an ordered list of vulnerabilities reflecting which minimum cut sets, if successfully attacked, will lead to the greatest disutility to the decisionmaker. Expert judgment is then used to determine the susceptibility to attack of each element of the minimum cut sets; this information is combined with the performance indices to obtain a qualitative vulnerability category for each minimum cut set.  This work is extended in Patterson and Apostolakis (2007)\cite{Patterson2007} to include the effects of geography in the vulnerability ranking, producing a metric called geographic valued worth.  Other work using decision analysis includes that of Zimmerman (2004)\cite{Zimmerman2004b}, who develops a set of vulnerability indicators for infrastructure interdependencies, and McDaniels \emph{et al.} (2008)\cite{McDaniels2008}, who develop an approach for characterizing infrastructure interdependencies with respect to affected systems and consequences to society.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simulation and game theory}
+\label{sec:ch1:interdependentreliability:simulation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In addition to and in combination with the methods described above, simulation is often used in modeling interdependent infrastructure systems. Commonly used types of simulations include agent-based, discrete event, and stochastic (e.g. Monte Carlo). Bernhardt and McNeil (2008)\cite{Bernhardt2008} discuss the use of agent-based modeling for making decisions about infrastructure improvements.  They present a case study for supporting pavement management in which there are four agents: pavement, users, maintenance personnel, and politicians/agency leaders.  Eusgeld \emph{et al.} (2011)\cite{Eusgeld2011} also advocate for the use of agent-based methods for modeling interdependent infrastructure.  In this work, the authors propose a ``system-of-systems (SoS)" approach in which the model architecture can be divided into three hierarchical levels: 1) low-level (system models of single infrastructures); 2) middle-level (model of interactions between single infrastructures); and 3) high-level (global model for the system-of-systems).
+
+Lee \emph{et al.} (2007)\cite{Lee2007} use a network flows approach for directing the restoration of services after disturbances in interdependent infrastructure systems.  The authors develop an ``interdependent layer network (ILN)" model which incorporates the management aspects unique to individual systems as well as the interconnections between systems. The ILN forms the basis of a mixed-integer program in which the objective is to minimize costs.  This work also includes a case study of optimal restoration of services in an interdependent system of power, telecommunications, and subway systems in Manhattan.  Relatedly, Bobbio (2010) \emph{et al.} \cite{Bobbio2010} use stochastic modeling to understand a real outage scenario that occurred in Rome, Italy in January 2004, in which failures occurred in an interdependent system consisting of a power system and a SCADA system (which included a backup power system). 
+
+Game theory is also sometimes used in modeling vulnerability of interdependent infrastructure systems.  Hausken (2008 and 2010)\cite{Hausken2008,Hausken2010} uses a game theoretic framework to determine the optimal amounts that a defender and an attacker should invest in defending and attacking elements of interdependent infrastructure systems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Summary of interdependent infrastructure reliability modeling}
+\label{sec:ch1:interdependentreliability:summary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Approaches for modeling interdependent infrastructure systems span a wide range, including inoperability input-output modeling, network theory, decision analysis, simulation, and game theory. However, many existing approaches are specifically tailored to particular case studies and decision contexts, and as such can be difficult to adapt to large-scale systems or fluctuating objectives.  Additionally, the universe of influences on complex, interdependent systems is often ill-defined, which can lead to wide variations in modeling results, depending on the definition used.  Chapter \ref{ch4} presents a framework for defining the relationships between factors which influence the reliability of interdependent infrastructure systems, and demonstrates the effects on estimates of system reliability.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Summary}
+\label{sec:ch1:summary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Infrastructure systems form the backbone of modern society.  Unfortunately, failures are a common occurrence in such systems, and can lead to devastating consequences for economics, health, and safety.  Understanding the reliability of infrastructure systems is therefore extremely important to ensure optimal management of these systems.  There has been significant work in the field of modeling the reliability of infrastructure systems, yet there remains a need for approaches that provide accurate representations of system reliability, while also scaling to large-scale, highly complex, and possibly interdependent systems.  Thus, the aim of this dissertation is to begin to address that need.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
